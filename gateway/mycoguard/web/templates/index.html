@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MycoGuard · {{ site_name }}</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 16a12 9 0 0 1 24 0z' fill='%232f6b4e'/%3E%3Crect x='12' y='15' width='8' height='12' rx='3' fill='%23c9b48a'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 16a12 9 0 0 1 24 0z" class="cap"/><rect x="12" y="15" width="8" height="12" rx="3" class="stem"/><circle cx="11" cy="11" r="1.6" class="spot"/><circle cx="19" cy="9.5" r="1.3" class="spot"/></svg>
+      <div><b>MycoGuard</b><span>{{ site_name }}</span></div>
+    </div>
+    <div class="top-status">
+      <span id="overall" class="pill pill-off">Đang kết nối…</span>
+      <span id="linkChip" class="chip">—</span>
+      {% if mode == 'sim' %}<span class="chip chip-sim" title="Dữ liệu từ bộ mô phỏng, không phải phần cứng">Mô phỏng</span>{% endif %}
+      <span id="clock" class="clock">--:--:--</span>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="profile-bar" aria-label="Hồ sơ và người vận hành">
+    <div class="field-inline">
+      <label for="profileSelect">Hồ sơ đang dùng</label>
+      <select id="profileSelect"></select>
+    </div>
+    <span id="profileInfo" class="muted"></span>
+    <span id="nextVent" class="muted"></span>
+    <div class="field-inline operator">
+      <label for="operatorInput">Người vận hành</label>
+      <input id="operatorInput" maxlength="40" placeholder="Nhập tên của bạn" autocomplete="name">
+    </div>
+  </section>
+
+  <section class="kpis" aria-label="Số đo hiện tại">
+    <article class="kpi" id="kpi-temp">
+      <div class="kpi-head"><span>Nhiệt độ</span><span class="pill pill-off" data-role="pill">—</span></div>
+      <div class="kpi-value"><b data-role="value">--.-</b><small>°C</small></div>
+      <div class="kpi-foot"><span data-role="range">Ngưỡng —</span><span data-role="note"></span></div>
+      <div class="kpi-bar"><i data-role="bar"></i></div>
+    </article>
+    <article class="kpi" id="kpi-humidity">
+      <div class="kpi-head"><span>Độ ẩm không khí</span><span class="pill pill-off" data-role="pill">—</span></div>
+      <div class="kpi-value"><b data-role="value">--.-</b><small>%</small></div>
+      <div class="kpi-foot"><span data-role="range">Ngưỡng —</span><span data-role="note"></span></div>
+      <div class="kpi-bar"><i data-role="bar"></i></div>
+    </article>
+    <article class="kpi" id="kpi-light">
+      <div class="kpi-head"><span>Ánh sáng</span><span class="pill pill-off" data-role="pill">—</span></div>
+      <div class="kpi-value"><b data-role="value">---</b><small>lux</small></div>
+      <div class="kpi-foot"><span data-role="range">Ngưỡng —</span><span data-role="note"></span></div>
+      <div class="kpi-bar"><i data-role="bar"></i></div>
+    </article>
+    <article class="kpi kpi-score" id="kpi-score">
+      <div class="kpi-head"><span>Grow Score</span><span class="muted small">mức phù hợp tổng thể</span></div>
+      <div class="kpi-value"><b id="scoreValue">--</b><small>/100</small></div>
+      <div class="kpi-foot"><span id="scoreNote">Chưa có dữ liệu</span></div>
+      <div class="kpi-bar"><i id="scoreBar"></i></div>
+    </article>
+  </section>
+
+  <div class="cols">
+    <div class="col-main">
+      <section class="panel" id="todoPanel">
+        <header class="panel-head">
+          <h2>Việc cần làm</h2>
+          <span id="todoCount" class="muted"></span>
+        </header>
+        <div id="alertList" class="alert-list"></div>
+      </section>
+
+      <section class="panel" id="chartPanel">
+        <header class="panel-head wrap">
+          <h2>Biểu đồ</h2>
+          <div class="seg" role="tablist" aria-label="Thông số">
+            <button class="seg-btn active" data-metric="temp" role="tab" aria-selected="true">Nhiệt độ</button>
+            <button class="seg-btn" data-metric="humidity" role="tab" aria-selected="false">Độ ẩm</button>
+            <button class="seg-btn" data-metric="light" role="tab" aria-selected="false">Ánh sáng</button>
+          </div>
+          <div class="seg" aria-label="Khoảng thời gian">
+            <button class="seg-btn active" data-range="1h">1 giờ</button>
+            <button class="seg-btn" data-range="24h">24 giờ</button>
+            <button class="seg-btn" data-range="7d">7 ngày</button>
+          </div>
+        </header>
+        <div class="chart-wrap"><canvas id="chart" aria-label="Biểu đồ lịch sử"></canvas></div>
+        <div class="chart-legend">
+          <span class="lg lg-band">Dải ngưỡng của hồ sơ</span>
+          <span class="lg lg-alert">Mở cảnh báo</span>
+          <span class="lg lg-handled">Người vận hành xử lý</span>
+        </div>
+      </section>
+
+      {% if mode == 'sim' %}
+      <section class="panel sim-panel" id="simPanel">
+        <header class="panel-head"><h2>Nhà nấm mô phỏng</h2><span class="muted small">phần cứng ảo, chỉ có ở chế độ mô phỏng</span></header>
+        <div class="sim-grid">
+          <div class="hw">
+            <pre id="simLcd" class="lcd" aria-label="Màn hình LCD2004 ảo"></pre>
+            <div class="leds" aria-label="Đèn báo ảo">
+              <span class="led led-green" id="ledGreen" title="LED xanh lá"></span>
+              <span class="led led-yellow" id="ledYellow" title="LED vàng"></span>
+              <span class="led led-red" id="ledRed" title="LED đỏ"></span>
+              <span class="led led-lamp" id="ledLamp" title="Đèn chiếu sáng"></span>
+              <span class="buzz" id="buzz" title="Buzzer">còi</span>
+            </div>
+            <p id="simEnv" class="muted small"></p>
+            <ul id="simEvents" class="mini-log"></ul>
+          </div>
+          <div>
+            <h3 class="sub first">Việc làm tại nhà nấm</h3>
+            <div id="simActions" class="chip-buttons"></div>
+            <h3 class="sub">Kịch bản</h3>
+            <div id="simScenarios" class="chip-buttons"></div>
+          </div>
+        </div>
+      </section>
+      {% endif %}
+    </div>
+
+    <div class="col-side">
+      <section class="panel" id="devicePanel">
+        <header class="panel-head"><h2>Thiết bị</h2><span class="muted small">gửi lệnh xuống Arduino</span></header>
+        <div class="dev-light">
+          <div class="dev-light-head">
+            <div>
+              <b>Đèn chiếu sáng</b>
+              <span id="lightState" class="muted">Tắt</span>
+            </div>
+            <button id="lightToggle" class="switch" role="switch" aria-checked="false" aria-label="Bật tắt đèn chiếu sáng"><i></i></button>
+          </div>
+          <div class="slider-row">
+            <label for="lightSlider" class="sr-only">Độ sáng</label>
+            <input type="range" id="lightSlider" min="10" max="100" step="5" value="60">
+            <output id="lightOut" for="lightSlider">60%</output>
+            <button id="lightApply" class="btn btn-small">Áp dụng</button>
+          </div>
+        </div>
+        <div class="dev-grid">
+          <button id="btnMute" class="btn">Tắt còi</button>
+          <button id="btnTest" class="btn">Thử đèn và còi</button>
+          <button id="btnBacklight" class="btn">Tắt đèn nền LCD</button>
+        </div>
+        <form id="msgForm" class="msg-form">
+          <label for="msgInput">Nhắn lên dòng 4 của LCD</label>
+          <div class="row">
+            <input id="msgInput" maxlength="40" placeholder="Ví dụ: Kiem tra bon nuoc">
+            <button class="btn btn-primary" type="submit">Gửi</button>
+          </div>
+          <span class="muted small">Tối đa 20 ký tự, dấu tiếng Việt sẽ được bỏ.</span>
+        </form>
+        <h3 class="sub">Thao tác gần đây</h3>
+        <ul id="deviceLog" class="mini-log"><li class="muted">Chưa có thao tác</li></ul>
+      </section>
+
+      <section class="panel" id="linkPanel">
+        <header class="panel-head"><h2>Kết nối</h2><span id="linkActive" class="muted"></span></header>
+        <div id="linkRows"></div>
+        <dl class="kv" id="linkStats"></dl>
+        <ul id="linkEvents" class="mini-log"></ul>
+      </section>
+    </div>
+  </div>
+
+  <section class="panel" id="logPanel">
+    <header class="panel-head wrap">
+      <h2>Nhật ký xử lý</h2>
+      <div class="stat-row" id="kpiRow"></div>
+    </header>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Mở lúc</th><th>Cảnh báo</th><th>Mức</th><th>Trạng thái</th><th>Việc đã làm</th><th>Người xử lý</th><th>Phản hồi</th><th>Khắc phục</th></tr></thead>
+        <tbody id="logBody"><tr><td colspan="8" class="muted">Chưa có cảnh báo nào</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="cols cols-even">
+    <section class="panel" id="historyPanel">
+      <header class="panel-head wrap">
+        <h2>Lịch sử số đo</h2>
+        <div class="row">
+          <label for="dateInput" class="sr-only">Lọc theo ngày</label>
+          <input type="date" id="dateInput">
+          <a id="exportLink" class="btn btn-small" href="/api/export.csv">Xuất CSV</a>
+        </div>
+      </header>
+      <div class="table-wrap">
+        <table class="table table-num">
+          <thead><tr><th>Thời gian</th><th>Nhiệt độ</th><th>Độ ẩm</th><th>Ánh sáng</th><th>Đèn</th><th>Trạng thái</th><th>Kênh</th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <button id="prevPage" class="btn btn-small">Trang trước</button>
+        <span id="pageInfo" class="muted"></span>
+        <button id="nextPage" class="btn btn-small">Trang sau</button>
+      </div>
+    </section>
+
+    <section class="panel" id="profilePanel">
+      <header class="panel-head wrap">
+        <h2>Hồ sơ nấm</h2>
+        <label for="profileEditSelect" class="sr-only">Chọn hồ sơ để sửa</label>
+        <select id="profileEditSelect"></select>
+      </header>
+      <form id="profileForm" class="profile-form">
+        <label class="span2">Tên hồ sơ<input name="name" required maxlength="60"></label>
+        <label>Nhiệt độ thấp nhất (°C)<input name="t_min" type="number" step="0.5" required></label>
+        <label>Nhiệt độ cao nhất (°C)<input name="t_max" type="number" step="0.5" required></label>
+        <label>Độ ẩm thấp nhất (%)<input name="h_min" type="number" step="1" min="0" max="100" required></label>
+        <label>Độ ẩm cao nhất (%)<input name="h_max" type="number" step="1" min="0" max="100" required></label>
+        <label>Ánh sáng thấp nhất (lux)<input name="lux_min" type="number" step="10" min="0" required></label>
+        <label>Ánh sáng cao nhất (lux)<input name="lux_max" type="number" step="10" min="0" required></label>
+        <label>Bật chiếu sáng lúc<input name="light_on" type="time"></label>
+        <label>Tắt chiếu sáng lúc<input name="light_off" type="time"></label>
+        <label class="span2">Nhắc thông gió mỗi (giờ, 0 = không nhắc)<input name="vent_remind_hours" type="number" min="0" max="24" step="1"></label>
+        <p class="muted small span2">Bỏ trống giờ chiếu sáng thì ánh sáng được đánh giá cả ngày.</p>
+        <div class="row span2">
+          <button class="btn btn-primary" type="submit">Lưu hồ sơ</button>
+          <button class="btn" type="button" id="activateBtn">Dùng hồ sơ này</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+  window.MG = { mode: {{ mode|tojson }}, actions: {{ actions|tojson }} };
+</script>
+<script src="{{ url_for('static', filename='chart.js') }}"></script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

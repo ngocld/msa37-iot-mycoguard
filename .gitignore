@@ -1,0 +1,11 @@
+# Môi trường Python
+.venv/
+__pycache__/
+*.pyc
+
+# Dữ liệu chạy thật và log (không đưa lên GitHub)
+data/
+
+# Slide báo cáo nộp riêng qua Classroom
+*.pptx
+~$*

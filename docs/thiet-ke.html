@@ -1,0 +1,587 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs"; mermaid.initialize({ startOnLoad: true });</script>
+<title>Thiết kế MycoGuard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: tài liệu thiết kế một cột rộng 1040px, dải điều hướng dính phía trên, sơ đồ được phép cuộn ngang trong khung riêng */
+:root{
+  --bg:#f4f7f5; --surface:#ffffff; --sunk:#eaf0ec; --fg:#17211c; --muted:#56665d; --line:#d3ddd6;
+  --accent:#2d6a4c; --accent-soft:#dcebe2;
+  --sensor:#16767a; --act:#a8620f; --comm:#4351a6; --pwr:#b33a3a; --opt:#8a958f;
+  --ok:#2f7d4a; --warn:#a86a00; --bad:#b33a3a;
+  --f-display:"Be Vietnam Pro","Segoe UI",system-ui,sans-serif;
+  --f-body:"Inter","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1411; --surface:#151d19; --sunk:#1b2520; --fg:#e2ebe5; --muted:#97a89e; --line:#2b3832;
+  --accent:#78c79c; --accent-soft:#1f3329;
+  --sensor:#5cc3c0; --act:#e3a65e; --comm:#97a5f2; --pwr:#ec7b7b; --opt:#6f7c75;
+  --ok:#6cc58c; --warn:#e3b04f; --bad:#ec7b7b; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0e1411; --surface:#151d19; --sunk:#1b2520; --fg:#e2ebe5; --muted:#97a89e; --line:#2b3832;
+  --accent:#78c79c; --accent-soft:#1f3329;
+  --sensor:#5cc3c0; --act:#e3a65e; --comm:#97a5f2; --pwr:#ec7b7b; --opt:#6f7c75;
+  --ok:#6cc58c; --warn:#e3b04f; --bad:#ec7b7b; color-scheme:dark;}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.6}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+header.top{padding-block:40px 24px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,4.4vw,40px);line-height:1.15;margin:.3em 0 .35em;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:600;font-size:24px;line-height:1.25;margin:0 0 12px;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:600;font-size:17px;margin:22px 0 8px}
+p{margin:0 0 12px;max-width:72ch}
+.lead{font-size:17px;color:var(--muted);max-width:68ch}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav.toc .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:10px;scrollbar-width:thin}
+nav.toc a{flex:none;font-size:13px;color:var(--muted);text-decoration:none;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--fg);border-color:var(--accent);outline:none}
+section{padding-block:36px 8px;border-bottom:1px solid var(--line);scroll-margin-top:56px}
+section:last-of-type{border-bottom:0}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:var(--muted)}
+.meta b{color:var(--fg);font-weight:600}
+.changes{margin-top:18px;background:var(--accent-soft);border-radius:10px;padding:12px 16px;font-size:14px}
+.changes b{font-weight:600}
+.changes ul{margin:6px 0 0;padding-left:20px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid2>*{min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.panel h3{margin-top:0}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:1px 9px;border-radius:999px;white-space:nowrap}
+.p-ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.p-warn{color:var(--warn);background:color-mix(in srgb,var(--warn) 16%,transparent)}
+.p-bad{color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,transparent)}
+.p-info{color:var(--comm);background:color-mix(in srgb,var(--comm) 14%,transparent)}
+.p-off{color:var(--muted);background:var(--sunk)}
+pre.code{font-family:var(--f-mono);font-size:13px;line-height:1.55;background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:0 0 14px}
+.c-dim{color:var(--muted)}
+.diagram{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:14px}
+.diagram svg{display:block;min-width:900px;width:100%;height:auto}
+.diagram pre.mermaid{margin:0;background:transparent;min-width:640px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin:0 0 10px}
+.legend span::before{content:"";display:inline-block;width:18px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle;background:currentColor}
+.lg-sen{color:var(--sensor)}.lg-act{color:var(--act)}.lg-com{color:var(--comm)}.lg-pwr{color:var(--pwr)}.lg-opt{color:var(--opt)}
+.callout{border-left:3px solid var(--warn);background:color-mix(in srgb,var(--warn) 8%,var(--surface));padding:12px 16px;border-radius:0 8px 8px 0;margin:0 0 14px}
+.callout.info{border-left-color:var(--accent);background:var(--accent-soft)}
+.callout p:last-child{margin:0}
+ul.clean{margin:0 0 12px;padding-left:20px}
+ul.clean li{margin-bottom:5px}
+.score{display:flex;flex-wrap:wrap;gap:12px;margin:18px 0 4px}
+.score .s{flex:1 1 200px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.score .s.now{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.score .s .v{font-family:var(--f-display);font-weight:700;font-size:28px;font-variant-numeric:tabular-nums}
+.score .s .k{font-size:13px;color:var(--muted)}
+.lcd{display:inline-block;font-family:var(--f-mono);font-size:15px;line-height:1.45;background:#1d3b8f;color:#e9f0ff;border-radius:8px;padding:12px 16px;white-space:pre;border:6px solid #2a2f36;max-width:100%;overflow-x:auto}
+.wf{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:12px}
+.wf div{background:var(--surface);border:1px dashed var(--line);border-radius:6px;padding:8px;color:var(--muted);min-width:0}
+.wf b{display:block;color:var(--fg);font-weight:600;font-size:12px}
+.wf .w2{grid-column:span 2}.wf .w4{grid-column:span 4}.wf .w3{grid-column:span 3}
+@media (max-width:620px){.wf{grid-template-columns:1fr 1fr}.wf .w3,.wf .w4{grid-column:span 2}}
+.q{counter-reset:q;list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.q li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px 12px 52px;position:relative}
+.q li::before{counter-increment:q;content:counter(q);position:absolute;left:16px;top:12px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--surface);font-weight:700;font-size:13px;display:grid;place-items:center}
+.decided{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:18px}
+.decided div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px}
+.decided span{display:block;font-size:12px;color:var(--muted)}
+/* SVG */
+.sv-box{fill:var(--surface);stroke:var(--line);stroke-width:1.2}
+.sv-opt{fill:var(--surface);stroke:var(--opt);stroke-width:1.2;stroke-dasharray:5 4}
+.sv-mcu{fill:var(--sunk);stroke:var(--accent);stroke-width:1.6}
+.sv-pi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.6}
+.sv-t{fill:var(--fg);font-family:var(--f-body);font-size:13px;font-weight:600}
+.sv-s{fill:var(--muted);font-family:var(--f-body);font-size:11px}
+.sv-pin{fill:var(--fg);font-family:var(--f-mono);font-size:12px}
+.sv-wl{fill:var(--muted);font-family:var(--f-mono);font-size:10.5px}
+.w{fill:none;stroke-width:2}
+.w-sen{stroke:var(--sensor)}.w-act{stroke:var(--act)}.w-com{stroke:var(--comm)}.w-pwr{stroke:var(--pwr)}.w-opt{stroke:var(--opt)}
+.dot{fill:var(--fg)}
+.dash{stroke-dasharray:6 5}
+.led-g{fill:var(--ok)}.led-y{fill:var(--warn)}.led-r{fill:var(--bad)}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<header class="top wrap">
+  <div class="eyebrow">IAD591 · Đồ án cuối kỳ IoT · Bản thiết kế v3.1 · đã duyệt</div>
+  <h1>MycoGuard: giám sát môi trường nhà trồng nấm</h1>
+  <p class="lead">Hệ thống IoT 3 tầng (Arduino Uno → Raspberry Pi 3B+ → Flask) theo dõi nhiệt độ, độ ẩm và ánh sáng cho nhà nấm bào ngư, đánh giá mức an toàn, cảnh báo và gợi ý việc cần làm. Người vận hành tự xử lý rồi xác nhận trên dashboard.</p>
+  <div class="meta">
+    <span>Hồ sơ mặc định: <b>nấm bào ngư · ra quả thể</b></span>
+    <span>Trạng thái: <b>đã duyệt, đã có source code và app mô phỏng</b></span>
+  </div>
+  <div class="changes"><b>Thay đổi so với v2</b>
+    <ul>
+      <li>v3.1: thêm LED trắng “đèn chiếu sáng” ở D9, bật tắt và chỉnh độ sáng từ dashboard; thêm hồ sơ “Demo · phòng lab”</li>
+      <li>Bỏ LM35: còn 2 cảm biến DHT22 + LDR, vẫn đủ yêu cầu “≥ 2 cảm biến”</li>
+      <li>Chưa có HC-05 và TM1637: dùng USB Serial làm kênh chính. Code vẫn viết sẵn phần Bluetooth và LED 4 số, bật bằng cấu hình khi có linh kiện</li>
+      <li>Đã chốt LCD2004 có module I2C</li>
+    </ul>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Mục lục"><div class="wrap">
+  <a href="#chot">Đã chốt</a><a href="#diem">Chiến lược điểm</a><a href="#nam">Thông số nấm</a><a href="#kien-truc">Kiến trúc</a><a href="#mach">Sơ đồ mạch</a><a href="#canh-bao">Cảnh báo & quy trình</a><a href="#giao-thuc">Giao thức</a><a href="#du-lieu">Dữ liệu</a><a href="#dashboard">Dashboard</a><a href="#mo-phong">Mô phỏng & repo</a><a href="#ke-hoach">Kế hoạch 6 giờ</a><a href="#rui-ro">Rủi ro</a><a href="#cau-hoi">Cần xác nhận</a>
+</div></nav>
+
+<main class="wrap">
+
+<section id="chot">
+  <h2>Những gì đã chốt</h2>
+  <div class="decided">
+    <div><span>Cảm biến</span>DHT22 (nhiệt độ + độ ẩm), quang trở LDR</div>
+    <div><span>Hiển thị tại chỗ</span>LCD2004 có module I2C</div>
+    <div><span>Báo hiệu</span>LED xanh lá, vàng, đỏ + buzzer</div>
+    <div><span>Điều khiển từ web</span>LED trắng “đèn chiếu sáng” D9, chỉnh độ sáng</div>
+    <div><span>Kênh truyền</span>USB Serial (UART). Bluetooth để sẵn trong code</div>
+    <div><span>LED 4 số</span>Chưa có TM1637, để sẵn trong code</div>
+    <div><span>Cách vận hành</span>Chỉ giám sát, con người xử lý</div>
+    <div><span>Lưu trữ</span>SQLite</div>
+    <div><span>Đối tượng</span>Nấm bào ngư, có thêm hồ sơ linh chi, nấm rơm</div>
+  </div>
+</section>
+
+<section id="diem">
+  <h2>Chiến lược điểm</h2>
+  <p>Khi chưa có HC-05 và TM1637, hai dòng “Giao tiếp” và “Raspberry Pi” chỉ đạt mức 7–8. Các dòng còn lại vẫn đạt 9–10, cộng điểm thưởng bù lại. Cả hai linh kiện đều rẻ và dễ mua; nếu mua kịp trước buổi thi, chỉ cần cắm vào và bật cấu hình, không phải sửa code.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Dòng rubric</th><th>Yêu cầu mức 9–10</th><th>Giải pháp hiện tại</th><th>Mức đạt</th></tr></thead>
+    <tbody>
+      <tr><td>Arduino</td><td>≥ 2 cảm biến + LCD1602 + ≥ 1 actuator</td><td>DHT22 + LDR, LCD2004, 3 LED + buzzer + đèn chiếu sáng</td><td><span class="pill p-ok">9–10</span></td></tr>
+      <tr><td>Giao tiếp</td><td>Bluetooth (backup Serial)</td><td>USB Serial. Thêm HC-05 thì có Bluetooth chính + USB dự phòng, tự chuyển kênh</td><td><span class="pill p-warn">7–8 · lên 9–10 khi có HC-05</span></td></tr>
+      <tr><td>Raspberry Pi</td><td>Flask + điều khiển + LED 4 số</td><td>Flask dashboard + điều khiển thiết bị báo hiệu. Thêm TM1637 trên GPIO của Pi</td><td><span class="pill p-warn">7–8 · lên 9–10 khi có TM1637</span></td></tr>
+      <tr><td>Lưu dữ liệu</td><td>SQLite</td><td>SQLite: số đo, cảnh báo, hành động của người vận hành, lệnh, hồ sơ nấm</td><td><span class="pill p-ok">9–10</span></td></tr>
+      <tr><td>Dashboard</td><td>Hiện tại + lịch sử + chart</td><td>Thẻ số liệu realtime, biểu đồ 1h/24h/7 ngày, bảng lịch sử, xuất CSV</td><td><span class="pill p-ok">9–10</span></td></tr>
+      <tr><td>Điều khiển từ GUI</td><td>Bắt buộc</td><td>Bật tắt và chỉnh độ sáng đèn chiếu sáng, tắt còi, xác nhận cảnh báo, đổi hồ sơ ngưỡng, nhắn lên LCD, đèn nền LCD, thử còi; mỗi lệnh có ACK</td><td><span class="pill p-ok">9–10</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Điểm thưởng</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Mục thưởng</th><th>Cách lấy điểm</th><th>Hiện tại</th></tr></thead>
+    <tbody>
+      <tr><td>GUI đẹp, dễ dùng</td><td>Một trang, màu trạng thái xanh/vàng/đỏ giống đèn trên mạch, dùng tốt trên điện thoại</td><td><span class="pill p-info">+0.25</span></td></tr>
+      <tr><td>Biểu đồ trực quan</td><td>Dải ngưỡng tô nền, đánh dấu thời điểm có cảnh báo và thời điểm người vận hành xử lý</td><td><span class="pill p-info">+0.25</span></td></tr>
+      <tr><td>Sáng tạo</td><td>Gợi ý hành động cụ thể, nhắc lịch thông gió, đo thời gian phản hồi và khắc phục, hồ sơ nấm theo giai đoạn</td><td><span class="pill p-info">+0.25</span></td></tr>
+      <tr><td>Bluetooth ổn định</td><td>Tỉ lệ mất gói, độ trễ ACK, số lần chuyển kênh trên dashboard</td><td><span class="pill p-off">cần HC-05</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="score">
+    <div class="s now"><div class="v">8–8.5</div><div class="k">Cấu hình hiện tại: USB Serial, không LED 4 số, +0.75 thưởng</div></div>
+    <div class="s"><div class="v">9–9.5</div><div class="k">Mua thêm HC-05: Giao tiếp lên 9–10, +1 thưởng</div></div>
+    <div class="s"><div class="v">9.5–10</div><div class="k">Mua thêm cả HC-05 và TM1637</div></div>
+  </div>
+  <p class="c-dim" style="font-size:13px">Ước tính dựa trên rubric; điểm thực tế do giảng viên đánh giá.</p>
+</section>
+
+<section id="nam">
+  <h2>Thông số môi trường theo giai đoạn</h2>
+  <p>Ngưỡng được lưu thành <b>hồ sơ</b>, đổi bằng một nút trên dashboard và gửi xuống Arduino. Mặc định là bào ngư · ra quả thể. Giá trị tham khảo, chỉnh được.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Hồ sơ</th><th>Nhiệt độ</th><th>Độ ẩm không khí</th><th>Ánh sáng</th><th>Nhắc thông gió</th></tr></thead>
+    <tbody>
+      <tr><td>Bào ngư · ủ tơ</td><td class="num">24–28 °C</td><td class="num">70–80 %</td><td>Tối, &lt; 50 lux</td><td>Không</td></tr>
+      <tr><td><b>Bào ngư · ra quả thể</b> (mặc định)</td><td class="num">22–28 °C</td><td class="num">85–95 %</td><td>200–500 lux, 6:00–16:00</td><td>Mỗi 3 giờ</td></tr>
+      <tr><td>Linh chi · ra quả thể</td><td class="num">25–30 °C</td><td class="num">85–90 %</td><td>500–1000 lux, 6:00–18:00</td><td>Mỗi 2 giờ</td></tr>
+      <tr><td>Nấm rơm</td><td class="num">30–35 °C</td><td class="num">80–90 %</td><td>Tán xạ yếu</td><td>Mỗi 3 giờ</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout info"><p>DHT22 đo được 0–100% RH, phù hợp dải 85–95% của nhà nấm. Ánh sáng chỉ được đánh giá trong khung giờ chiếu sáng; Pi giữ đồng hồ và báo cho Arduino biết đang trong khung giờ hay không.</p></div>
+</section>
+
+<section id="kien-truc">
+  <h2>Kiến trúc 3 tầng</h2>
+  <p>Arduino tự đánh giá trạng thái và bật đèn, còi tại chỗ, nên vẫn cảnh báo được khi Pi tắt. Pi lo phần cần đồng hồ, lưu trữ, gợi ý hành động và giao diện. Nét đứt là phần để sẵn, bật khi có linh kiện.</p>
+  <div class="diagram"><pre class="mermaid">
+flowchart LR
+  subgraph DEV["Tầng thiết bị: Arduino Uno"]
+    direction TB
+    SEN["Cảm biến<br/>DHT22 · LDR"]
+    FW["Firmware<br/>đọc 2s · lọc nhiễu · xếp mức OK / CHÚ Ý / NGUY HIỂM"]
+    OUT["Báo tại chỗ<br/>LED xanh · vàng · đỏ · buzzer"]
+    LCD["LCD2004 I2C<br/>số đo + gợi ý"]
+    SEN --> FW --> OUT
+    FW --> LCD
+  end
+  subgraph GW["Tầng Gateway/Edge: Raspberry Pi 3B+"]
+    direction TB
+    LM["Link Manager<br/>USB Serial · Bluetooth khi có HC-05"]
+    PROC["Xử lý biên<br/>kiểm tra · cảnh báo · gợi ý hành động · lịch nhắc"]
+    DB[("SQLite")]
+    TM["LED 4 số TM1637<br/>khi có linh kiện"]
+    LM --> PROC --> DB
+    PROC -.-> TM
+  end
+  subgraph APP["Tầng ứng dụng: Flask Web"]
+    direction TB
+    API["REST API"]
+    UI["Dashboard<br/>realtime · lịch sử · biểu đồ · xác nhận xử lý"]
+    API --> UI
+    UI --> API
+  end
+  HUM(["Người vận hành"])
+  FW -- "JSON mỗi 2s qua USB Serial" --> LM
+  FW -. "Bluetooth HC-05 (tùy chọn)" .-> LM
+  LM -- "lệnh + ACK" --> FW
+  PROC --> API
+  API --> PROC
+  DB --> API
+  OUT --> HUM
+  UI --> HUM
+  HUM -- "xử lý tại nhà nấm, bấm Đã xử lý" --> UI
+</pre></div>
+</section>
+
+<section id="mach">
+  <h2>Sơ đồ đấu nối phần cứng</h2>
+  <p>Mạch chính chỉ có 2 cảm biến, 4 thiết bị báo hiệu và LCD. Phần nét đứt xám là HC-05 và TM1637, chưa lắp, chân đã chừa sẵn.</p>
+  <div class="legend"><span class="lg-sen">Cảm biến</span><span class="lg-act">Thiết bị đầu ra</span><span class="lg-com">Truyền thông</span><span class="lg-pwr">Nguồn</span><span class="lg-opt">Để sẵn, chưa lắp</span></div>
+  <div class="diagram">
+  <svg viewBox="0 0 1160 470" role="img" aria-label="Sơ đồ đấu nối Arduino Uno với DHT22, LDR, LED, buzzer, LCD2004 I2C và Raspberry Pi qua USB; HC-05 và TM1637 để sẵn">
+    <rect class="sv-mcu" x="360" y="40" width="200" height="400" rx="10"/>
+    <text class="sv-t" x="460" y="64" text-anchor="middle">Arduino Uno</text>
+    <text class="sv-s" x="460" y="82" text-anchor="middle">ATmega328P · logic 5V</text>
+
+    <!-- left -->
+    <g class="w w-sen"><path d="M260 110H360"/></g>
+    <g class="w w-act"><path d="M260 170H360"/><path d="M260 220H360"/><path d="M260 270H360"/><path d="M260 320H360"/></g>
+    <g class="w w-act"><path d="M260 370H360"/></g>
+    <g class="w w-pwr"><path d="M260 420H360"/></g>
+    <g class="dot"><circle cx="360" cy="110" r="4"/><circle cx="360" cy="170" r="4"/><circle cx="360" cy="220" r="4"/><circle cx="360" cy="270" r="4"/><circle cx="360" cy="320" r="4"/><circle cx="360" cy="370" r="4"/><circle cx="360" cy="420" r="4"/></g>
+    <g class="sv-pin"><text x="372" y="114">D2</text><text x="372" y="174">D5</text><text x="372" y="224">D6</text><text x="372" y="274">D7</text><text x="372" y="324">D8</text><text x="372" y="374">D9 ~PWM</text><text x="372" y="424">5V · GND</text></g>
+
+    <rect class="sv-box" x="30" y="90" width="230" height="40" rx="6"/><text class="sv-t" x="42" y="106">DHT22</text><text class="sv-s" x="42" y="122">Nhiệt độ + độ ẩm · kéo lên 10kΩ</text>
+    <rect class="sv-box" x="30" y="150" width="230" height="40" rx="6"/><circle class="led-g" cx="244" cy="170" r="6"/><text class="sv-t" x="42" y="166">LED xanh lá</text><text class="sv-s" x="42" y="182">Trạng thái OK · 220Ω</text>
+    <rect class="sv-box" x="30" y="200" width="230" height="40" rx="6"/><circle class="led-y" cx="244" cy="220" r="6"/><text class="sv-t" x="42" y="216">LED vàng</text><text class="sv-s" x="42" y="232">CHÚ Ý · 220Ω</text>
+    <rect class="sv-box" x="30" y="250" width="230" height="40" rx="6"/><circle class="led-r" cx="244" cy="270" r="6"/><text class="sv-t" x="42" y="266">LED đỏ</text><text class="sv-s" x="42" y="282">NGUY HIỂM · 220Ω</text>
+    <rect class="sv-box" x="30" y="300" width="230" height="40" rx="6"/><text class="sv-t" x="42" y="316">Buzzer</text><text class="sv-s" x="42" y="332">Kêu khi NGUY HIỂM, tắt từ web</text>
+    <rect class="sv-box" x="30" y="350" width="230" height="40" rx="6"/><text class="sv-t" x="42" y="366">LED trắng · đèn chiếu sáng</text><text class="sv-s" x="42" y="382">Bật tắt từ web, đặt sát LDR · 220Ω</text>
+    <rect class="sv-box" x="30" y="400" width="230" height="40" rx="6"/><text class="sv-t" x="42" y="416">Ray nguồn breadboard</text><text class="sv-s" x="42" y="432">5V và GND chung cho mọi module</text>
+
+    <!-- right -->
+    <g class="w w-opt dash"><path d="M560 110H660"/><path d="M560 150H660"/></g>
+    <g class="w w-sen"><path d="M560 210H660"/></g>
+    <g class="w w-act"><path d="M560 280H660"/><path d="M560 320H660"/></g>
+    <g class="w w-com"><path d="M560 410H950V380"/></g>
+    <g class="dot"><circle cx="560" cy="110" r="4"/><circle cx="560" cy="150" r="4"/><circle cx="560" cy="210" r="4"/><circle cx="560" cy="280" r="4"/><circle cx="560" cy="320" r="4"/><circle cx="560" cy="410" r="4"/></g>
+    <g class="sv-pin" text-anchor="end"><text x="548" y="114">D10 RX</text><text x="548" y="154">D11 TX</text><text x="548" y="214">A0</text><text x="548" y="284">A4 SDA</text><text x="548" y="324">A5 SCL</text><text x="548" y="414">USB</text></g>
+    <text class="sv-wl" x="610" y="144" text-anchor="middle">1k/2kΩ</text>
+    <text class="sv-wl" x="680" y="402">USB Serial · 115200 baud · kênh chính</text>
+
+    <rect class="sv-opt" x="660" y="90" width="220" height="80" rx="6"/><text class="sv-t" x="672" y="118">HC-05 (chưa lắp)</text><text class="sv-s" x="672" y="136">TXD → D10 (nối thẳng)</text><text class="sv-s" x="672" y="152">RXD ← D11 qua phân áp 3.3V</text>
+    <rect class="sv-box" x="660" y="190" width="220" height="40" rx="6"/><text class="sv-t" x="672" y="206">Quang trở LDR</text><text class="sv-s" x="672" y="222">Phân áp với điện trở 10kΩ</text>
+    <rect class="sv-box" x="660" y="260" width="220" height="80" rx="6"/><text class="sv-t" x="672" y="294">LCD2004 + I2C</text><text class="sv-s" x="672" y="312">20 ký tự × 4 dòng · 0x27 / 0x3F</text>
+
+    <!-- Pi -->
+    <rect class="sv-box" x="920" y="20" width="210" height="50" rx="6"/><text class="sv-t" x="932" y="40">Trình duyệt</text><text class="sv-s" x="932" y="58">Điện thoại người vận hành, laptop</text>
+    <path class="w w-com" d="M1100 70V180"/><text class="sv-wl" x="1094" y="128" text-anchor="end">HTTP :5000</text>
+    <path class="w w-opt dash" d="M880 130H1025V180"/><text class="sv-wl" x="890" y="122">Bluetooth SPP · 9600 · tùy chọn</text>
+    <rect class="sv-pi" x="920" y="180" width="210" height="200" rx="10"/>
+    <text class="sv-t" x="1025" y="206" text-anchor="middle">Raspberry Pi 3B+</text>
+    <text class="sv-s" x="936" y="236">• Gateway Python + Link Manager</text>
+    <text class="sv-s" x="936" y="256">• SQLite mycoguard.db</text>
+    <text class="sv-s" x="936" y="276">• Flask dashboard</text>
+    <text class="sv-s" x="936" y="296">• Đồng hồ: khung giờ sáng, lịch nhắc</text>
+    <text class="sv-s" x="936" y="316">• Bluetooth tích hợp (khi có HC-05)</text>
+    <text class="sv-s" x="936" y="350">/dev/ttyACM0 · 115200</text>
+    <path class="w w-opt dash" d="M1065 380V400"/>
+    <rect class="sv-opt" x="980" y="400" width="150" height="50" rx="6"/><text class="sv-t" x="992" y="420">TM1637 (chưa lắp)</text><text class="sv-s" x="992" y="438">CLK GPIO23 · DIO GPIO24</text>
+  </svg>
+  </div>
+
+  <div class="tbl"><table>
+    <thead><tr><th>Linh kiện</th><th>Nối vào</th><th>Ghi chú đấu nối</th></tr></thead>
+    <tbody>
+      <tr><td>DHT22</td><td class="mono">D2</td><td>VCC 5V, điện trở 10kΩ từ DATA lên 5V (bỏ nếu là module 3 chân đã có trở). Đọc tối đa mỗi 2 giây</td></tr>
+      <tr><td>LDR</td><td class="mono">A0</td><td>5V → LDR → A0 → 10kΩ → GND. Sáng hơn thì giá trị lớn hơn. Đổi ra lux ước lượng, hiệu chuẩn bằng app đo sáng trên điện thoại</td></tr>
+      <tr><td>LED xanh lá / vàng / đỏ</td><td class="mono">D5 / D6 / D7</td><td>Mỗi LED nối tiếp 220Ω, cực âm về GND. Chỉ một đèn sáng tại một thời điểm, giống đèn giao thông</td></tr>
+      <tr><td>Buzzer</td><td class="mono">D8</td><td>Kêu 3 tiếng mỗi 10 giây khi NGUY HIỂM; im khi người vận hành bấm tắt còi</td></tr>
+      <tr><td>LED trắng “đèn chiếu sáng”</td><td class="mono">D9</td><td>220Ω, chân PWM để chỉnh độ sáng từ web. Đặt sát quang trở để bật đèn thì lux tăng thật khi demo</td></tr>
+      <tr><td>LCD2004 I2C</td><td class="mono">A4 SDA, A5 SCL</td><td>VCC 5V. Nếu màn hình sáng mà không có chữ, chỉnh biến trở xanh trên module I2C</td></tr>
+      <tr><td>Raspberry Pi</td><td class="mono">USB</td><td>Cáp USB vừa cấp nguồn cho Arduino vừa là kênh truyền dữ liệu, không cần mạch hạ áp</td></tr>
+      <tr><td>HC-05 <span class="pill p-off">chưa lắp</span></td><td class="mono">D10, D11</td><td>SoftwareSerial 9600. D11 → 1kΩ → RXD → 2kΩ (hai 1kΩ nối tiếp) → GND để hạ 5V xuống ~3.3V</td></tr>
+      <tr><td>TM1637 <span class="pill p-off">chưa lắp</span></td><td class="mono">Pi GPIO23, GPIO24</td><td>VCC 3.3V của Pi (chân 1), GND chân 6. Hiện luân phiên nhiệt độ, độ ẩm, lux mỗi 3 giây</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Bố cục LCD2004</h3>
+  <div class="grid2">
+    <div><div class="lcd">T:26.4C   H: 81.2%
+Sang: 312 lux   USB
+TT: CHU Y  [AM THAP]
+&gt;Can: phun suong    </div></div>
+    <div><ul class="clean">
+      <li>Dòng 1: nhiệt độ và độ ẩm</li>
+      <li>Dòng 2: ánh sáng và kênh đang nối với Pi (USB, BT hoặc <code>--</code> khi mất kết nối)</li>
+      <li>Dòng 3: mức trạng thái và thông số đang lệch</li>
+      <li>Dòng 4: gợi ý hành động, hoặc lời nhắn gửi từ dashboard</li>
+      <li>LCD dùng chữ không dấu vì chip HD44780 không có ký tự tiếng Việt</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="canh-bao">
+  <h2>Đánh giá trạng thái và quy trình xử lý</h2>
+  <p>Hệ thống không tự điều khiển môi trường. Nó xếp mỗi thông số vào 3 mức, báo bằng đèn, còi, LCD, dashboard, và nói rõ người vận hành nên làm gì.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Mức</th><th>Điều kiện</th><th>Báo hiệu</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill p-ok">OK</span></td><td>Mọi thông số trong ngưỡng của hồ sơ</td><td>LED xanh lá</td></tr>
+      <tr><td><span class="pill p-warn">CHÚ Ý</span></td><td>Có thông số lệch khỏi ngưỡng nhưng chưa quá biên (2 °C, 5% RH, 30% lux), hoặc lệch quá biên chưa tới 60 giây</td><td>LED vàng, LCD dòng 3–4, dashboard</td></tr>
+      <tr><td><span class="pill p-bad">NGUY HIỂM</span></td><td>Lệch quá biên liên tục trên 60 giây, hoặc DHT22 lỗi</td><td>LED đỏ, buzzer, LCD, dashboard, ghi bảng alerts</td></tr>
+    </tbody>
+  </table></div>
+  <p style="margin-top:12px">Ngưỡng có vùng trễ: trạng thái chỉ quay về OK khi thông số đã vào trong ngưỡng thêm 0.5 °C hoặc 2% RH, để đèn không nhấp nháy quanh mép ngưỡng. DHT22 bị coi là lỗi khi đọc thất bại 3 lần liên tiếp hoặc giá trị nhảy bất thường (hơn 5 °C hay 20% RH trong 2 giây).</p>
+
+  <h3>Gợi ý hành động</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Tình huống</th><th>Gợi ý hiển thị</th><th>Lý do</th></tr></thead>
+    <tbody>
+      <tr><td>RH &lt; ngưỡng dưới</td><td>Phun sương, tưới ẩm nền và vách</td><td>Không phun thẳng lên mũ nấm vì dễ thối</td></tr>
+      <tr><td>RH &gt; ngưỡng trên</td><td>Mở cửa thông gió, tạm ngừng tưới</td><td>Ẩm đọng kéo dài dễ nhiễm mốc xanh</td></tr>
+      <tr><td>T &gt; ngưỡng trên</td><td>Mở cửa, bật quạt, phun sương mái làm mát</td><td>Nấm bào ngư khô mép, chậm ra quả thể khi quá nóng</td></tr>
+      <tr><td>T &lt; ngưỡng dưới</td><td>Đóng cửa, che chắn giữ nhiệt</td><td>Tơ nấm phát triển chậm</td></tr>
+      <tr><td>Thiếu sáng trong khung giờ sáng</td><td>Bật đèn hoặc mở rèm</td><td>Quả thể cần ánh sáng tán xạ để định hướng mọc</td></tr>
+      <tr><td>Thừa sáng</td><td>Che bớt ánh sáng trực tiếp</td><td>Nắng trực tiếp làm khô và cháy mũ nấm</td></tr>
+      <tr><td>DHT22 lỗi</td><td>Kiểm tra dây và vị trí cảm biến</td><td>Không ra quyết định dựa trên số đo sai</td></tr>
+      <tr><td>Đến lịch thông gió</td><td>Mở cửa thông gió 2–3 phút</td><td>Xả CO2; bộ linh kiện không có cảm biến CO2 nên dùng lịch nhắc</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Vòng đời một cảnh báo</h3>
+  <div class="diagram"><pre class="mermaid">
+stateDiagram-v2
+  state "Đang mở" as OPEN
+  state "Đã nhận" as ACKED
+  state "Đã xử lý" as HANDLED
+  state "Đã khắc phục" as RESOLVED
+  state "Chưa hiệu quả" as REOPEN
+  [*] --> OPEN: thông số lệch quá 10 giây
+  OPEN --> ACKED: người vận hành bấm Đã nhận, còi tắt
+  ACKED --> HANDLED: chọn việc đã làm, ví dụ phun sương
+  HANDLED --> RESOLVED: thông số về ngưỡng trong 15 phút
+  HANDLED --> REOPEN: sau 15 phút vẫn lệch
+  REOPEN --> HANDLED: xử lý lại
+  OPEN --> RESOLVED: tự về ngưỡng
+  RESOLVED --> [*]
+</pre></div>
+  <p>Từ các mốc thời gian này, dashboard tính <b>thời gian phản hồi</b> (từ lúc cảnh báo đến lúc nhận) và <b>thời gian khắc phục</b> (đến lúc thông số về ngưỡng). Đây là phần mở rộng ngoài yêu cầu, phù hợp mục điểm thưởng sáng tạo.</p>
+</section>
+
+<section id="giao-thuc">
+  <h2>Giao thức truyền thông</h2>
+  <p>Hiện tại dữ liệu đi qua USB Serial 115200 baud. Firmware gửi cùng khung lên cả cổng USB và cổng HC-05 ngay từ đầu, nên khi gắn HC-05 thì không phải sửa code Arduino; Pi đọc cả hai kênh, bỏ khung trùng theo <code>seq</code>.</p>
+<pre class="code"><span class="c-dim">Arduino → Pi · mỗi 2 giây · một dòng JSON kết thúc bằng \n</span>
+{"seq":1532,"t":26.4,"h":81.2,"lux":312,"light":0,"st":1,"f":4,"d":0,"bz":0,"mu":0,"lp":1,"err":0}
+<span class="c-dim">st: 0 OK · 1 CHÚ Ý · 2 NGUY HIỂM
+f : bit thông số đang lệch (T thấp, T cao, RH thấp, RH cao, sáng thấp, sáng cao, lỗi cảm biến)
+d : bit thông số đã ở mức NGUY HIỂM   bz: còi đang kêu   lp: đang trong giờ chiếu sáng</span>
+
+<span class="c-dim">Pi → Arduino · lệnh dạng văn bản: #id|LỆNH|tham số</span>
+#21|TH|22,28,85,95,200,500   <span class="c-dim">ngưỡng tMin,tMax,hMin,hMax,luxMin,luxMax</span>
+#22|LP|1                     <span class="c-dim">đang trong khung giờ chiếu sáng</span>
+#28|LIGHT|153                <span class="c-dim">độ sáng đèn chiếu sáng 0–255 (0 = tắt)</span>
+#23|MUTE|1                   <span class="c-dim">tắt còi cho cảnh báo hiện tại</span>
+#24|MSG|Can: phun suong      <span class="c-dim">ghi dòng 4 của LCD (tối đa 20 ký tự)</span>
+#25|BL|0                     <span class="c-dim">tắt / bật đèn nền LCD</span>
+#26|TEST|1                   <span class="c-dim">chạy thử 3 LED và còi trong 3 giây</span>
+#27|PING
+
+<span class="c-dim">Arduino trả lời</span>
+{"ack":21,"ok":1}</pre>
+
+  <div class="grid2">
+    <div class="diagram" style="margin:0"><pre class="mermaid">
+sequenceDiagram
+  participant A as Arduino
+  participant L as Link Manager
+  participant P as Xử lý biên
+  participant W as Dashboard
+  loop mỗi 2 giây
+    A->>L: seq=1532, t=26.4, h=81.2
+    L->>P: khung hợp lệ, bỏ trùng
+    P->>P: ghi SQLite, mở cảnh báo, chọn gợi ý
+  end
+  W->>P: bấm Đã nhận
+  P->>L: lệnh id 23 MUTE
+  L->>A: tắt còi
+  A-->>L: ack 23
+  L-->>P: ACK, trễ 40 ms
+  P-->>W: cảnh báo chuyển Đã nhận
+  Note over L,A: Không có ACK sau 1s thì gửi lại, tối đa 3 lần
+</pre></div>
+    <div class="diagram" style="margin:0"><pre class="mermaid">
+stateDiagram-v2
+  state "Bluetooth (chính)" as BT
+  state "USB (dự phòng)" as USB
+  state "Mất kết nối" as OFF
+  [*] --> USB: chưa có HC-05
+  USB --> BT: có HC-05 và BT ổn định 10s
+  BT --> USB: không có khung BT quá 6s
+  USB --> OFF: USB mất quá 6s
+  OFF --> USB: nhận khung USB
+</pre></div>
+  </div>
+  <p style="margin-top:14px">Sơ đồ bên phải mô tả cơ chế chuyển kênh, chỉ chạy khi đã gắn HC-05. Nếu mất kết nối với Pi, Arduino vẫn đánh giá theo ngưỡng cuối cùng nhận được (lưu trong EEPROM) và vẫn bật đèn, còi tại chỗ.</p>
+</section>
+
+<section id="du-lieu">
+  <h2>Lưu trữ dữ liệu</h2>
+  <p>SQLite, một file <code>mycoguard.db</code>. Ghi số đo mỗi 5 giây, khoảng 17.000 dòng mỗi ngày.</p>
+<pre class="code">CREATE TABLE readings (
+  id INTEGER PRIMARY KEY, ts TEXT NOT NULL, seq INTEGER,
+  temp REAL, humidity REAL, lux INTEGER,
+  status INTEGER,                    <span class="c-dim">-- 0 OK, 1 CHÚ Ý, 2 NGUY HIỂM</span>
+  link TEXT                          <span class="c-dim">-- 'USB' | 'BT' | 'SIM'</span>
+);
+CREATE TABLE alerts (
+  id INTEGER PRIMARY KEY, opened_at TEXT, level INTEGER, metric TEXT,
+  value REAL, message TEXT, suggestion TEXT,
+  acked_at TEXT, handled_at TEXT, resolved_at TEXT,
+  state TEXT                         <span class="c-dim">-- OPEN | ACKED | HANDLED | RESOLVED | REOPEN</span>
+);
+CREATE TABLE human_actions (
+  id INTEGER PRIMARY KEY, ts TEXT, alert_id INTEGER REFERENCES alerts(id),
+  action TEXT,                       <span class="c-dim">-- 'Phun sương', 'Mở cửa thông gió', ...</span>
+  operator TEXT, note TEXT
+);
+CREATE TABLE commands (
+  id INTEGER PRIMARY KEY, ts TEXT, cmd TEXT, args TEXT,
+  status TEXT, retries INTEGER, latency_ms INTEGER, link TEXT
+);
+CREATE TABLE profiles (
+  id INTEGER PRIMARY KEY, name TEXT, t_min REAL, t_max REAL, h_min REAL, h_max REAL,
+  lux_min INTEGER, lux_max INTEGER, light_on TEXT, light_off TEXT,
+  vent_remind_hours INTEGER, active INTEGER DEFAULT 0
+);
+CREATE INDEX idx_readings_ts ON readings(ts);</pre>
+</section>
+
+<section id="dashboard">
+  <h2>Dashboard Flask</h2>
+  <p>Một trang chính, cập nhật mỗi 2 giây. Biểu đồ tự vẽ bằng canvas, không cần tải thư viện từ Internet, nên chạy được khi phòng lab không có mạng.</p>
+  <div class="wf" aria-label="Phác thảo bố cục dashboard">
+    <div class="w4"><b>Thanh trên</b>Tên nhà nấm · hồ sơ đang dùng · trạng thái chung (xanh/vàng/đỏ) · kênh USB/BT · mất gói %</div>
+    <div><b>Nhiệt độ</b>26.4 °C · ngưỡng 22–28</div>
+    <div><b>Độ ẩm</b>81 % · ngưỡng 85–95</div>
+    <div><b>Ánh sáng</b>312 lux · trong giờ sáng</div>
+    <div><b>Grow Score</b>0–100, mức phù hợp tổng thể</div>
+    <div class="w4"><b>Việc cần làm</b>Độ ẩm thấp 4 phút → Phun sương, tưới ẩm nền · nút Đã nhận · nút Đã xử lý (chọn việc đã làm, ghi chú)</div>
+    <div class="w3"><b>Biểu đồ</b>Nhiệt độ, độ ẩm, ánh sáng · 1h / 24h / 7 ngày · dải ngưỡng tô nền · mốc cảnh báo và mốc xử lý</div>
+    <div><b>Thiết bị</b>Tắt còi · thử còi · đèn nền LCD · nhắn lên LCD · chọn hồ sơ</div>
+    <div class="w2"><b>Nhật ký xử lý</b>Cảnh báo · người xử lý · việc đã làm · thời gian phản hồi / khắc phục</div>
+    <div class="w2"><b>Lịch sử</b>Bảng phân trang · lọc theo ngày · xuất CSV</div>
+  </div>
+  <h3>API</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Endpoint</th><th>Dùng để</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">GET /api/state</td><td>Số đo mới nhất, trạng thái, cảnh báo đang mở, kênh truyền, thống kê link</td></tr>
+      <tr><td class="mono">GET /api/history?metric=&amp;range=24h</td><td>Dữ liệu cho biểu đồ (gộp trung bình khi khoảng dài)</td></tr>
+      <tr><td class="mono">POST /api/alerts/&lt;id&gt;/ack</td><td>Xác nhận đã nhận cảnh báo, gửi lệnh tắt còi</td></tr>
+      <tr><td class="mono">POST /api/alerts/&lt;id&gt;/handle</td><td>Ghi việc đã làm, bắt đầu theo dõi kết quả 15 phút</td></tr>
+      <tr><td class="mono">POST /api/device</td><td>Thử còi, đèn nền LCD, nhắn lên LCD</td></tr>
+      <tr><td class="mono">GET/PUT /api/profiles</td><td>Xem, sửa, kích hoạt hồ sơ; gửi ngưỡng xuống Arduino</td></tr>
+      <tr><td class="mono">GET /api/export.csv</td><td>Tải lịch sử dạng CSV</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="mo-phong">
+  <h2>App mô phỏng và cấu trúc repo</h2>
+  <p>Mục tiêu: viết xong và chạy thử toàn bộ phần mềm trên Windows <b>trước buổi thi</b>, không cần phần cứng. Vào lab chỉ còn lắp mạch, nạp code và đổi từ mô phỏng sang cổng USB thật.</p>
+  <div class="grid2">
+    <div class="panel"><h3>Mô phỏng phía Pi</h3><ul class="clean">
+      <li>Arduino ảo nói đúng giao thức thật, thay cho cổng USB</li>
+      <li>Mô hình nhà nấm: nhiệt và ánh sáng theo ngày đêm, độ ẩm giảm dần khi không tưới</li>
+      <li>Bảng “hành động người vận hành” (chỉ có trong mô phỏng): phun sương, mở cửa, bật đèn, che sáng. Bấm vào thì môi trường mô phỏng thay đổi, để thử trọn quy trình cảnh báo → xử lý → khắc phục</li>
+      <li>Kịch bản: trưa nắng nóng, khô hanh, DHT22 hỏng, mất kết nối (và mất Bluetooth để thử chuyển kênh trước khi mua HC-05)</li>
+      <li>Chạy: <code>python run.py --link sim</code></li>
+    </ul></div>
+    <div class="panel"><h3>Mô phỏng phía Arduino</h3><ul class="clean">
+      <li>Dự án Wokwi (<code>diagram.json</code>) với Uno, DHT22, cảm biến ánh sáng, LCD2004 I2C, 3 LED, buzzer</li>
+      <li>Kéo thanh trượt nhiệt độ, độ ẩm, ánh sáng trên Wokwi để thấy đèn đổi màu, còi kêu, LCD đổi gợi ý</li>
+      <li>Gõ lệnh <code>#1|MUTE|1</code> trong Serial Monitor để thử chiều ngược lại</li>
+    </ul></div>
+  </div>
+<pre class="code" style="margin-top:16px">mycoguard/
+├── arduino/mycoguard_node/
+│   ├── mycoguard_node.ino      <span class="c-dim">vòng lặp chính, đọc cảm biến, gửi JSON</span>
+│   ├── config.h                <span class="c-dim">chân, ngưỡng mặc định, bật/tắt HC-05</span>
+│   ├── status.h                <span class="c-dim">xếp mức OK / CHÚ Ý / NGUY HIỂM, đèn, còi</span>
+│   └── protocol.h              <span class="c-dim">phân tích lệnh, ACK</span>
+├── gateway/
+│   ├── run.py                  <span class="c-dim">--link usb | bt | auto | sim</span>
+│   ├── link_manager.py         <span class="c-dim">nhiều kênh, bỏ trùng seq, chuyển kênh, gửi lại</span>
+│   ├── processor.py            <span class="c-dim">kiểm tra, vòng đời cảnh báo, gợi ý hành động</span>
+│   ├── scheduler.py            <span class="c-dim">khung giờ sáng, nhắc thông gió, hồ sơ</span>
+│   ├── db.py · display_tm1637.py (tắt mặc định) · config.py
+│   ├── sim/greenhouse_sim.py   <span class="c-dim">mô hình nhà nấm + Arduino ảo</span>
+│   └── web/ app.py · templates/ · static/
+├── database/schema.sql · sample_data.csv
+├── wokwi/diagram.json · libraries.txt
+├── docs/ wiring.png · architecture.png
+└── README.md                   <span class="c-dim">cài đặt trên Pi, chạy, bật HC-05 / TM1637 sau này</span></pre>
+  <p>Công nghệ: Arduino C++ (thư viện DHT, LiquidCrystal_I2C, SoftwareSerial, EEPROM; không dùng <code>String</code> để tiết kiệm RAM 2KB), Python 3 trên Pi (Flask, pyserial, sqlite3 có sẵn), biểu đồ canvas tự viết.</p>
+</section>
+
+<section id="ke-hoach">
+  <h2>Kế hoạch cho buổi thi 6 giờ</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Thời điểm</th><th>Việc làm</th><th>Kết quả cần có</th></tr></thead>
+    <tbody>
+      <tr><td>Trước buổi thi</td><td>Hoàn thiện code, chạy mô phỏng, cài sẵn thư viện trên thẻ nhớ Pi, soạn khung slide</td><td>Dashboard chạy được ở chế độ mô phỏng</td></tr>
+      <tr><td class="num">0:00–1:00</td><td>Chuẩn bị: kiểm tra linh kiện, dò địa chỉ I2C của LCD2004, thử DHT22 và LDR</td><td>Biết linh kiện nào hỏng để đổi sớm</td></tr>
+      <tr><td class="num">1:00–2:00</td><td>Lắp cảm biến, LCD, LED, buzzer; nạp firmware</td><td>LCD hiện số đo, đèn đổi màu theo ngưỡng</td></tr>
+      <tr><td class="num">2:00–3:00</td><td>Nối USB, chạy gateway và dashboard với dữ liệu thật</td><td>Hệ thống chạy trọn 3 tầng</td></tr>
+      <tr><td class="num">3:00–4:00</td><td>Thử trọn quy trình cảnh báo, chỉnh ngưỡng cho hợp điều kiện phòng lab; gắn HC-05 / TM1637 nếu đã có</td><td>Demo ổn định</td></tr>
+      <tr><td class="num">4:00–5:15</td><td>Quay video demo, chụp màn hình dashboard</td><td>Video 3–7 phút</td></tr>
+      <tr><td class="num">5:15–6:00</td><td>Dự phòng, đẩy code lên GitHub, xuất dữ liệu mẫu</td><td>Nộp đủ sản phẩm</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Kịch bản video demo</h3>
+  <ul class="clean">
+    <li>Giới thiệu mạch, LCD và đèn xanh ở trạng thái OK</li>
+    <li>Đặt hồ sơ “ra quả thể” (cần 85–95% RH) trong phòng khô → đèn vàng, rồi đỏ, còi kêu, LCD gợi ý phun sương</li>
+    <li>Trên điện thoại: bấm Đã nhận (còi tắt), làm ẩm cảm biến bằng khăn ướt hoặc hà hơi, bấm Đã xử lý → độ ẩm về ngưỡng, cảnh báo chuyển Đã khắc phục, hiện thời gian phản hồi</li>
+    <li>Che LDR trong khung giờ sáng → cảnh báo thiếu sáng; gửi lời nhắn từ web lên LCD</li>
+    <li>Rút cáp USB vài giây → dashboard báo mất kết nối, Arduino vẫn tự báo đèn tại chỗ; cắm lại → dữ liệu chạy tiếp</li>
+    <li>Mở biểu đồ, bảng lịch sử, nhật ký xử lý, xuất CSV, mở file SQLite</li>
+  </ul>
+</section>
+
+<section id="rui-ro">
+  <h2>Rủi ro và cách xử lý</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Rủi ro</th><th>Cách xử lý</th></tr></thead>
+    <tbody>
+      <tr><td>Thiếu HC-05 và TM1637 làm 2 dòng rubric chỉ đạt 7–8</td><td>Code đã sẵn sàng cho cả hai; mua kịp thì cắm vào và bật trong <code>config.h</code> / <code>config.py</code></td></tr>
+      <tr><td>Giảng viên cho rằng “điều khiển từ GUI” phải là điều khiển môi trường</td><td>Nêu rõ trong slide: GUI điều khiển còi, LCD, ngưỡng trên Arduino, có ACK. Nếu muốn chắc hơn, thêm 1 LED “đèn chiếu sáng” bật tắt từ web (1 chân, 1 điện trở)</td></tr>
+      <tr><td>LCD2004 không hiện chữ</td><td>Dò địa chỉ bằng sketch I2C scanner, chỉnh biến trở tương phản trên module</td></tr>
+      <tr><td>Phòng lab quá khô hoặc quá nóng so với ngưỡng nấm, cảnh báo kêu liên tục</td><td>Có hồ sơ “Demo” với ngưỡng gần điều kiện phòng để quay video cho chủ động</td></tr>
+      <tr><td>LDR không cho lux chính xác</td><td>Ghi rõ là lux ước lượng, hiệu chuẩn 2–3 điểm bằng app đo sáng điện thoại</td></tr>
+      <tr><td>Phòng lab không có Internet</td><td>Không dùng thư viện CDN; cài sẵn Flask và pyserial trên Pi</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="cau-hoi">
+  <h2>Quyết định đã chốt</h2>
+  <ol class="q">
+    <li><b>Đã duyệt thiết kế</b> và triển khai thành source code trong thư mục <code>mycoguard/</code>.</li>
+    <li><b>Thêm LED “đèn chiếu sáng”</b> ở chân D9, bật tắt và chỉnh độ sáng từ dashboard.</li>
+    <li><b>Thêm hồ sơ “Demo · phòng lab”</b> (20–31 °C, 45–75 %, 80–2000 lux) để quay video chủ động.</li>
+  </ol>
+</section>
+
+</main>

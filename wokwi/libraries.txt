@@ -1,0 +1,4 @@
+# Thư viện cho dự án Wokwi (Library Manager trên wokwi.com đọc file này)
+DHT sensor library
+Adafruit Unified Sensor
+LiquidCrystal I2C

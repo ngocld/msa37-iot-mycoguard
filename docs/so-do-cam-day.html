@@ -1,0 +1,584 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sơ đồ cắm dây MycoGuard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: một hình lắp ráp lớn ở đầu trang (cuộn ngang trên điện thoại), bên dưới là các bước cắm và bảng dây.
+   Hình vẽ giữ màu vật lý (bo mạch, dây); chữ và nền trang theo theme. */
+:root{
+  --bg:#f2f5f4; --surface:#ffffff; --sunk:#e9efed; --fg:#16201c; --muted:#56645e; --line:#d3ddd9;
+  --accent:#0f6b5c; --accent-soft:#d9eee8; --warn:#9a5a00; --warn-soft:#fbeedb;
+  --wire-edge:#2c312e; --stage:#e4e9e6;
+  --f-display:"Be Vietnam Pro","Segoe UI",system-ui,sans-serif;
+  --f-body:"Inter","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1412; --surface:#151d1a; --sunk:#1b2622; --fg:#e2ebe7; --muted:#9aa9a3; --line:#2a3531;
+  --accent:#5cc7b0; --accent-soft:#16302a; --warn:#e7ad55; --warn-soft:#3a2b14;
+  --wire-edge:#0a0c0b; --stage:#1d2622; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0e1412; --surface:#151d1a; --sunk:#1b2622; --fg:#e2ebe7; --muted:#9aa9a3; --line:#2a3531;
+  --accent:#5cc7b0; --accent-soft:#16302a; --warn:#e7ad55; --warn-soft:#3a2b14;
+  --wire-edge:#0a0c0b; --stage:#1d2622; color-scheme:dark;}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.6}
+.wrap{max-width:1060px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 56px}
+.wide{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 8px}
+header.top{padding-block:32px 16px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,4vw,36px);line-height:1.15;margin:.3em 0 .3em;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:600;font-size:21px;margin:0 0 10px;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:600;font-size:16px;margin:0 0 6px}
+p{margin:0 0 12px;max-width:76ch}
+.lead{color:var(--muted);font-size:16px;max-width:76ch}
+code{font-family:var(--f-mono);font-size:.9em}
+kbd{font-family:var(--f-mono);font-size:.85em;background:var(--sunk);border:1px solid var(--line);border-radius:5px;padding:0 5px;white-space:nowrap}
+section{padding-block:26px 4px;border-top:1px solid var(--line)}
+.stage{background-color:#2b3037;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:24px 24px;border:1px solid #1d2126;border-radius:14px;padding:12px;overflow:auto}
+.stage .wire{transition:opacity .15s}
+.stage svg.hl .wire{opacity:.16}
+.stage svg.hl .wire.on{opacity:1}
+.stage .wire.on .core{stroke-width:7}
+.stage .wire{cursor:pointer}
+tr[data-w]{cursor:pointer}
+tr[data-w]:hover,tr[data-w]:focus,tr[data-w].on{background:var(--accent-soft);outline:none}
+@media (prefers-reduced-motion:reduce){.stage .wire{transition:none}}
+.stage svg{display:block;width:100%;height:auto;min-width:980px}
+.stage.big svg{min-width:1700px}
+.stage-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin:0 0 8px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:22px;height:6px;border-radius:3px;border:1px solid var(--muted)}
+.btn{font:inherit;font-size:13px;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:4px 12px;cursor:pointer}
+.btn:hover,.btn:focus-visible{border-color:var(--accent);outline:none}
+.caption{font-size:13px;color:var(--muted);margin:8px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.grid>*{min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.bom{list-style:none;margin:0;padding:0;display:grid;gap:3px;font-size:14px}
+.bom li{display:flex;justify-content:space-between;gap:10px}
+.bom b{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.dots{margin:0;padding-left:18px;font-size:14px}
+.dots li{margin-bottom:4px}
+.callout{border-left:3px solid var(--warn);background:var(--warn-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:14.5px}
+.callout p:last-child{margin:0}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--sunk);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td .sw{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid var(--muted);vertical-align:-1px;margin-right:6px}
+.progress{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;margin:0 0 12px;font-size:14px}
+.bar{flex:1 1 160px;height:8px;background:var(--sunk);border-radius:99px;overflow:hidden;max-width:360px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+ol.steps{list-style:none;margin:0;padding:0;display:grid;gap:10px;counter-reset:st}
+ol.steps>li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:26px minmax(0,1fr);gap:2px 12px;counter-increment:st}
+ol.steps>li.done{border-color:var(--accent);background:color-mix(in srgb,var(--accent-soft) 55%,var(--surface))}
+ol.steps input{width:20px;height:20px;margin:3px 0 0;accent-color:var(--accent);cursor:pointer}
+ol.steps label{font-family:var(--f-display);font-weight:600;cursor:pointer}
+ol.steps label::before{content:"Bước " counter(st) " · ";color:var(--accent)}
+ol.steps ul{grid-column:2;margin:2px 0 0;padding-left:18px;font-size:14.5px}
+ol.steps ul li{margin-bottom:3px}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<header class="top wrap">
+  <div class="eyebrow">MycoGuard · IAD591 · Hướng dẫn lắp mạch</div>
+  <h1>Sơ đồ lắp ráp MycoGuard</h1>
+  <p class="lead">Một hình duy nhất, vẽ theo đúng cách bạn đặt trên bàn: Arduino nằm ngay trên breadboard với cổng USB quay sang phải, LCD2004 bên trái. Mỗi sợi dây đi từ đúng chân Arduino tới đúng lỗ breadboard. Vị trí lỗ ghi theo dạng <kbd>hàng + cột</kbd>, ví dụ <kbd>C8</kbd> là hàng C, cột 8.</p>
+</header>
+
+<div class="wide">
+  <div class="stage-bar">
+    <div class="legend" id="legend"></div>
+    <button class="btn" id="zoomBtn" type="button" aria-pressed="false">Phóng to hình</button>
+  </div>
+  <div class="stage" id="stage"><svg id="art" viewBox="0 0 1270 1020" role="img" aria-label="Sơ đồ lắp ráp: Arduino Uno, breadboard, LCD2004 I2C và toàn bộ dây nối"></svg></div>
+  <p class="caption">Arduino và breadboard vẽ đúng tỉ lệ (1 lỗ = 2,54 mm); LCD2004 thu nhỏ một nửa. Màn hình LCD hiện đúng bố cục của firmware, số đo là mô phỏng và đổi mỗi 2 giây. Đầu dây có chụp đen là chỗ cắm; dây chỉ đi ngang qua ray hay lỗ khác thì không cắm vào đó. Rê chuột hoặc chạm vào một dây, hay một dòng trong bảng dây bên dưới, để làm nổi sợi dây đó; chạm lần nữa để bỏ.</p>
+</div>
+
+<main class="wrap">
+
+<section>
+  <h2>Chuẩn bị</h2>
+  <div class="grid">
+    <div class="card"><h3>Linh kiện</h3><ul class="bom">
+      <li>Arduino Uno + cáp USB<b>1</b></li>
+      <li>Breadboard 30 cột trở lên<b>1</b></li>
+      <li>DHT22, quang trở, buzzer<b>1 mỗi loại</b></li>
+      <li>LED xanh lá, vàng, đỏ, trắng<b>1 mỗi màu</b></li>
+      <li>LCD2004 có module I2C<b>1</b></li>
+    </ul></div>
+    <div class="card"><h3>Điện trở và dây</h3><ul class="bom">
+      <li>220Ω (đỏ đỏ nâu)<b>4</b></li>
+      <li>10kΩ (nâu đen cam)<b>2</b></li>
+      <li>Dây đực–đực<b>13</b></li>
+      <li>Dây cái–đực cho LCD<b>4</b></li>
+    </ul></div>
+    <div class="card"><h3>Ba điều cần nhớ</h3><ul class="dots">
+      <li>Rút cáp USB trong lúc cắm dây.</li>
+      <li>LED: <b>chân dài là +</b>, chân ngắn (phía cạnh phẳng) là –.</li>
+      <li>DHT22: nhìn mặt lưới, <b>chân 1 (VCC) bên trái</b>. Cắm ngược sẽ hỏng cảm biến.</li>
+    </ul></div>
+  </div>
+  <div class="callout"><p>Chỉ dùng nửa trên breadboard và hai ray trên. Nửa dưới để trống, dành cho HC-05 sau này. Mỗi điện trở 220Ω có một chân cắm vào lỗ hàng B, chân kia cắm thẳng vào ray – phía trên.</p></div>
+</section>
+
+<section>
+  <h2>Các bước cắm</h2>
+  <div class="progress"><span id="progText">Đã xong 0/10 bước</span><div class="bar"><i id="progBar"></i></div><button class="btn" id="resetBtn" type="button">Bỏ đánh dấu</button></div>
+  <ol class="steps" id="steps">
+    <li><input type="checkbox" id="s1"><label for="s1">Đặt bo mạch</label>
+      <ul><li>Breadboard nằm ngang, ray có vạch đỏ ở mép trên, hàng A ngay dưới hai ray.</li>
+      <li>Arduino đặt phía trên breadboard, <b>cổng USB quay sang phải</b>, hàng chân số (0–13) ở cạnh dưới, gần breadboard.</li></ul></li>
+    <li><input type="checkbox" id="s2"><label for="s2">Nguồn</label>
+      <ul><li>Dây đỏ: chân <kbd>5V</kbd> (cạnh trên Arduino) → ray <b>+</b>, cột 30.</li>
+      <li>Dây đen: chân <kbd>GND</kbd> ngay cạnh 5V → ray <b>–</b>, cột 30.</li></ul></li>
+    <li><input type="checkbox" id="s3"><label for="s3">DHT22 · chân D2</label>
+      <ul><li>Mặt lưới quay về phía bạn. Chân 1, 2, 3, 4 vào <kbd>D3</kbd>, <kbd>D4</kbd>, <kbd>D5</kbd>, <kbd>D6</kbd>.</li>
+      <li>Điện trở 10kΩ: <kbd>B3</kbd> – <kbd>B4</kbd> (cắm đứng, nối VCC với DATA).</li>
+      <li>Dây đỏ ngắn: <kbd>A3</kbd> → ray +. Dây đen ngắn: <kbd>A6</kbd> → ray –.</li>
+      <li>Dây vàng: chân <kbd>2</kbd> Arduino → <kbd>A4</kbd>.</li>
+      <li>Module 3 chân (+, OUT, –): + → ray +, OUT → chân 2, – → ray –, bỏ điện trở 10kΩ.</li></ul></li>
+    <li><input type="checkbox" id="s4"><label for="s4">LED xanh lá · chân D5</label>
+      <ul><li>Chân dài <kbd>C8</kbd>, chân ngắn <kbd>C9</kbd>.</li>
+      <li>220Ω: <kbd>B9</kbd> → ray –.</li>
+      <li>Dây xanh lá: chân <kbd>~5</kbd> → <kbd>A8</kbd>.</li></ul></li>
+    <li><input type="checkbox" id="s5"><label for="s5">LED vàng · chân D6</label>
+      <ul><li>Chân dài <kbd>C11</kbd>, chân ngắn <kbd>C12</kbd>.</li>
+      <li>220Ω: <kbd>B12</kbd> → ray –.</li>
+      <li>Dây cam: chân <kbd>~6</kbd> → <kbd>A11</kbd>.</li></ul></li>
+    <li><input type="checkbox" id="s6"><label for="s6">LED đỏ · chân D7</label>
+      <ul><li>Chân dài <kbd>C14</kbd>, chân ngắn <kbd>C15</kbd>.</li>
+      <li>220Ω: <kbd>B15</kbd> → ray –.</li>
+      <li>Dây tím: chân <kbd>7</kbd> → <kbd>A14</kbd>.</li></ul></li>
+    <li><input type="checkbox" id="s7"><label for="s7">Buzzer · chân D8</label>
+      <ul><li>Chân <b>+</b> vào <kbd>E17</kbd>, chân – vào <kbd>E19</kbd>.</li>
+      <li>Dây đen ngắn: <kbd>A19</kbd> → ray –.</li>
+      <li>Dây nâu: chân <kbd>8</kbd> → <kbd>A17</kbd>.</li></ul></li>
+    <li><input type="checkbox" id="s8"><label for="s8">LED trắng (đèn chiếu sáng) · chân D9</label>
+      <ul><li>Chân dài <kbd>C22</kbd>, chân ngắn <kbd>C23</kbd>. Uốn nhẹ đầu LED về phía quang trở.</li>
+      <li>220Ω: <kbd>B23</kbd> → ray –.</li>
+      <li>Dây trắng: chân <kbd>~9</kbd> → <kbd>A22</kbd>.</li></ul></li>
+    <li><input type="checkbox" id="s9"><label for="s9">Quang trở · chân A0</label>
+      <ul><li>Hai chân vào <kbd>C25</kbd> và <kbd>C27</kbd> (không phân cực).</li>
+      <li>Điện trở 10kΩ: <kbd>B27</kbd> → ray –.</li>
+      <li>Dây đỏ ngắn: <kbd>A25</kbd> → ray +.</li>
+      <li>Dây xám: chân <kbd>A0</kbd> (cạnh trên Arduino) → <kbd>E27</kbd>, đi vòng bên phải rồi theo rãnh giữa breadboard.</li></ul></li>
+    <li><input type="checkbox" id="s10"><label for="s10">LCD2004 I2C</label>
+      <ul><li>4 dây cái–đực, đầu cái cắm vào 4 chân của module I2C sau lưng LCD.</li>
+      <li><kbd>SCL</kbd> → chân <kbd>A5</kbd>, <kbd>SDA</kbd> → chân <kbd>A4</kbd>.</li>
+      <li><kbd>VCC</kbd> → ray +, cột 1. <kbd>GND</kbd> → ray –, cột 1.</li></ul></li>
+  </ol>
+</section>
+
+<section>
+  <h2>Bảng dây để dò lại</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Từ</th><th>Đến</th><th>Dây</th><th>Nối gì</th></tr></thead>
+    <tbody id="wireTable"></tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>Kiểm tra</h2>
+  <div class="grid">
+    <div class="card"><h3>Trước khi cấp điện</h3><ul class="dots">
+      <li>Không có dây nào nối thẳng ray + sang ray –.</li>
+      <li>Đo đồng hồ vạn năng giữa ray + và ray –: không được gần 0Ω.</li>
+      <li>Chân dài mỗi LED cùng cột với dây tín hiệu từ Arduino.</li>
+      <li>DHT22: VCC ở <kbd>D3</kbd>, GND ở <kbd>D6</kbd>.</li>
+    </ul></div>
+    <div class="card"><h3>Sau khi cắm USB</h3><ul class="dots">
+      <li>LCD hiện <code>MycoGuard v1.0</code> rồi số đo. Sáng mà không có chữ: vặn biến trở xanh sau module I2C; vẫn không có: đổi <code>LCD_ADDR</code> thành <code>0x3F</code>.</li>
+      <li>Serial Monitor 115200 baud: mỗi 2 giây một dòng JSON; <code>"t":null</code> là DHT22 sai dây.</li>
+      <li><code>#1|TEST|1</code>: 3 LED sáng lần lượt, còi kêu. <code>#2|LIGHT|255</code>: LED trắng sáng, <code>"lux"</code> tăng.</li>
+    </ul></div>
+    <div class="card"><h3>Sau này gắn HC-05</h3><ul class="dots">
+      <li>Nối ray – trên với ray – dưới, ray + trên với ray + dưới (2 dây ở cột 30).</li>
+      <li><kbd>TXD</kbd> → chân 10. <kbd>RXD</kbd> qua phân áp: chân 11 → 1kΩ → điểm giữa → 2kΩ → GND; RXD nối điểm giữa.</li>
+      <li>Đặt HC-05 và phân áp ở nửa dưới breadboard.</li>
+    </ul></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var W = { red:"#d93636", black:"#262626", yellow:"#f2c21b", green:"#2f9e4f", orange:"#f08a24", purple:"#8e55c9",
+            brown:"#8b5a2b", white:"#f3f3f0", grey:"#9aa1a8", blue:"#2f6fd6", pink:"#ea6fae" };
+  var NAME = { red:"đỏ", black:"đen", yellow:"vàng", green:"xanh lá", orange:"cam", purple:"tím", brown:"nâu",
+               white:"trắng", grey:"xám", blue:"xanh dương", pink:"hồng" };
+
+  // ---------- Toạ độ ----------
+  var BX = 480;                                   // cột 1
+  var X = function (c) { return BX + (c - 1) * 22; };
+  var Y = { "T+":626, "T-":648, A:684, B:706, C:728, D:750, E:772, F:820, G:842, H:864, I:886, J:908, "B-":944, "B+":966 };
+  var UX = 480, UY = 60;                          // góc trên trái Arduino (đã xoay 180°, USB bên phải)
+  var DIG = [["0",22],["1",44],["2",66],["3",88],["4",110],["5",132],["6",154],["7",176],["8",211],["9",233],
+             ["10",255],["11",277],["12",299],["13",321],["GND",343],["AREF",365],["SDA",387],["SCL",409]];
+  var PWR = [["A5",44],["A4",66],["A3",88],["A2",110],["A1",132],["A0",154],["VIN",229],["GND",251],["GND",273],
+             ["5V",295],["3V3",317],["RESET",339],["IOREF",361],["",383]];
+  function dpin(n) { for (var i = 0; i < DIG.length; i++) if (DIG[i][0] === n) return [UX + DIG[i][1], UY + 440]; }
+  function ppin(n, k) { var seen = 0; for (var i = 0; i < PWR.length; i++) if (PWR[i][0] === n && ++seen === (k || 1)) return [UX + PWR[i][1], UY + 22]; }
+
+  var s = "";
+  function add(x) { s += x; }
+
+  // ---------- Đường bo góc ----------
+  function rpath(pts, r) {
+    r = r || 14;
+    var d = "M" + pts[0][0] + " " + pts[0][1];
+    for (var i = 1; i < pts.length - 1; i++) {
+      var p0 = pts[i - 1], p1 = pts[i], p2 = pts[i + 1];
+      var d1 = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]), d2 = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+      var rr = Math.min(r, d1 / 2, d2 / 2);
+      var ax = p1[0] + (p0[0] - p1[0]) / d1 * rr, ay = p1[1] + (p0[1] - p1[1]) / d1 * rr;
+      var bx = p1[0] + (p2[0] - p1[0]) / d2 * rr, by = p1[1] + (p2[1] - p1[1]) / d2 * rr;
+      d += " L" + ax.toFixed(1) + " " + ay.toFixed(1) + " Q" + p1[0] + " " + p1[1] + " " + bx.toFixed(1) + " " + by.toFixed(1);
+    }
+    var l = pts[pts.length - 1];
+    return d + " L" + l[0] + " " + l[1];
+  }
+  var plugs = "";
+  function plugAt(p) {
+    return '<rect x="' + (p[0] - 5.5) + '" y="' + (p[1] - 5.5) + '" width="11" height="11" rx="2" fill="#151515" stroke="#000" stroke-width="0.6"/>' +
+           '<rect x="' + (p[0] - 2) + '" y="' + (p[1] - 2) + '" width="4" height="4" fill="#c9c9c9"/>';
+  }
+  var wires = "";
+  function wire(pts, color, r, id) {
+    var d = rpath(pts, r || 26);
+    wires += '<g class="wire" data-w="' + (id || "") + '">';
+    wires += '<path d="' + d + '" fill="none" stroke="#0d0f11" stroke-width="7.6" stroke-linecap="round" stroke-linejoin="round"/>';
+    wires += '<path class="core" d="' + d + '" fill="none" stroke="' + W[color] + '" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>';
+    wires += '<path d="' + d + '" fill="none" stroke="#ffffff" stroke-opacity="' + (color === "black" ? ".38" : ".3") + '" stroke-width="1.3" stroke-linecap="round" transform="translate(-1.2 -1.2)"/>';
+    wires += plugAt(pts[0]) + plugAt(pts[pts.length - 1]) + '</g>';
+  }
+
+  // ================= Breadboard =================
+  add('<rect x="452" y="604" width="700" height="396" rx="10" fill="#000" opacity=".12" transform="translate(4 6)"/>');
+  add('<rect x="450" y="600" width="700" height="396" rx="10" fill="#f6f6f1" stroke="#cfcfc5" stroke-width="1.5"/>');
+  add('<rect x="450" y="786" width="700" height="20" fill="#e1e1d8"/>');
+  [[614, "#d93636"], [660, "#2f6fd6"], [932, "#2f6fd6"], [978, "#d93636"]].forEach(function (l) {
+    add('<line x1="468" x2="1132" y1="' + l[0] + '" y2="' + l[0] + '" stroke="' + l[1] + '" stroke-width="2"/>');
+  });
+  function hole(x, y) { add('<rect x="' + (x - 3.6) + '" y="' + (y - 3.6) + '" width="7.2" height="7.2" rx="1.4" fill="#b4b8b1"/>'); }
+  ["T+", "T-", "B-", "B+"].forEach(function (r) {           // ray: nhóm 5 lỗ
+    for (var c = 1; c <= 30; c++) if ((c - 1) % 6 !== 5) hole(X(c), Y[r]);
+  });
+  "ABCDEFGHIJ".split("").forEach(function (r) {
+    for (var c = 1; c <= 30; c++) hole(X(c), Y[r]);
+    add('<text x="463" y="' + (Y[r] + 3.5) + '" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="600" fill="#6b6f6a" text-anchor="middle">' + r + '</text>');
+    add('<text x="1137" y="' + (Y[r] + 3.5) + '" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="600" fill="#6b6f6a" text-anchor="middle">' + r + '</text>');
+  });
+  [1, 5, 10, 15, 20, 25, 30].forEach(function (c) {
+    add('<text x="' + X(c) + '" y="674" font-family="IBM Plex Mono,monospace" font-size="9.5" font-weight="600" fill="#6b6f6a" text-anchor="middle">' + c + '</text>');
+    add('<text x="' + X(c) + '" y="924" font-family="IBM Plex Mono,monospace" font-size="9.5" font-weight="600" fill="#6b6f6a" text-anchor="middle">' + c + '</text>');
+  });
+  [["+", 630], ["–", 652], ["–", 948], ["+", 970]].forEach(function (r) {
+    add('<text x="462" y="' + r[1] + '" font-size="13" font-weight="700" fill="#6b6f6a" text-anchor="middle">' + r[0] + '</text>');
+    add('<text x="1138" y="' + r[1] + '" font-size="13" font-weight="700" fill="#6b6f6a" text-anchor="middle">' + r[0] + '</text>');
+  });
+  add('<text x="800" y="868" font-family="Inter,sans-serif" font-size="12" fill="#9a9d97" text-anchor="middle">Nửa dưới để trống (dành cho HC-05 sau này)</text>');
+
+  // ---------- Linh kiện ----------
+  var R220 = ["#c62828", "#c62828", "#6d4321", "#c9a227"], R10K = ["#6d4321", "#1a1a1a", "#f08a24", "#c9a227"];
+  function resistorV(x, y1, y2, bands) {           // điện trở đứng: từ lỗ y1 tới ray y2
+    var top = Math.min(y1, y2), bot = Math.max(y1, y2), mid = (top + bot) / 2;
+    add('<line x1="' + x + '" y1="' + top + '" x2="' + x + '" y2="' + bot + '" stroke="#8a8a8a" stroke-width="2.4"/>');
+    add('<rect x="' + (x - 6.5) + '" y="' + (mid - 16) + '" width="13" height="32" rx="6" fill="#e6cf9e" stroke="#9c8250"/>');
+    bands.forEach(function (c, i) { add('<rect x="' + (x - 6.5) + '" y="' + (mid - 11 + i * 6.5) + '" width="13" height="3.2" fill="' + c + '"/>'); });
+    plugs += '<circle cx="' + x + '" cy="' + top + '" r="2.6" fill="#7b7b7b"/><circle cx="' + x + '" cy="' + bot + '" r="2.6" fill="#7b7b7b"/>';
+  }
+  function resistorH(c1, c2, row, bands) {
+    var x1 = X(c1), x2 = X(c2), y = Y[row], bw = Math.max(14, x2 - x1 - 6), bx = (x1 + x2) / 2 - bw / 2;
+    add('<line x1="' + x1 + '" y1="' + y + '" x2="' + x2 + '" y2="' + y + '" stroke="#8a8a8a" stroke-width="2.4"/>');
+    add('<rect x="' + bx + '" y="' + (y - 6) + '" width="' + bw + '" height="12" rx="5" fill="#e6cf9e" stroke="#9c8250"/>');
+    bands.forEach(function (c, i) { add('<rect x="' + (bx + 2 + i * (bw - 4) / 4) + '" y="' + (y - 6) + '" width="2.2" height="12" fill="' + c + '"/>'); });
+  }
+  function led(cA, row, body, rim, name) {
+    var cx = (X(cA) + X(cA + 1)) / 2, cy = Y[row];
+    add('<circle cx="' + cx + '" cy="' + cy + '" r="21" fill="' + body + '" stroke="' + rim + '" stroke-width="2"/>');
+    add('<circle cx="' + cx + '" cy="' + cy + '" r="14" fill="#ffffff" opacity=".22"/>');
+    add('<path d="M' + (cx + 15) + ' ' + (cy - 14.5) + ' A21 21 0 0 1 ' + (cx + 15) + ' ' + (cy + 14.5) + '" fill="none" stroke="' + rim + '" stroke-width="3"/>');
+    add('<line x1="' + (cx + 15) + '" y1="' + (cy - 14.5) + '" x2="' + (cx + 15) + '" y2="' + (cy + 14.5) + '" stroke="' + rim + '" stroke-width="2"/>');
+    add('<circle cx="' + (cx - 7) + '" cy="' + (cy - 8) + '" r="4" fill="#ffffff" opacity=".55"/>');
+    add('<text x="' + (X(cA) - 13) + '" y="' + (cy - 12) + '" font-size="12" font-weight="700" fill="#333" text-anchor="middle">+</text>');
+    label(cx, 768, name);
+  }
+  function label(x, y, t, color) {
+    add('<text x="' + x + '" y="' + y + '" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="' + (color || "#2d322f") +
+        '" text-anchor="middle" paint-order="stroke" stroke="#f6f6f1" stroke-width="3">' + t + '</text>');
+  }
+
+  // DHT22: chân D3..D6, mặt lưới quay xuống phía người cắm
+  var dx = (X(3) + X(6)) / 2;
+  add('<rect x="' + (dx - 58) + '" y="716" width="116" height="66" rx="6" fill="#f4f4f2" stroke="#8d8d8d" stroke-width="1.5"/>');
+  for (var gy = 724; gy <= 768; gy += 8) add('<rect x="' + (dx - 46) + '" y="' + gy + '" width="92" height="4" rx="2" fill="#cfcfcb"/>');
+  add('<text x="' + dx + '" y="777" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#555" text-anchor="middle">DHT22</text>');
+  [3, 4, 5, 6].forEach(function (c, i) {
+    add('<text x="' + X(c) + '" y="796" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600" fill="#555" text-anchor="middle">' + (i + 1) + '</text>');
+  });
+  resistorH(3, 4, "B", R10K);
+
+  led(8, "C", "#3fcf6b", "#1d7a3a", "LED xanh lá");
+  led(11, "C", "#f7d34a", "#9a7d12", "LED vàng");
+  led(14, "C", "#ee4d42", "#932019", "LED đỏ");
+  led(22, "C", "#fbfbf6", "#9a9a90", "LED trắng");
+  [9, 12, 15, 23].forEach(function (c) { resistorV(X(c), Y.B, Y["T-"], R220); });
+
+  // Buzzer: + E17, – E19
+  var bzx = X(18), bzy = Y.E;
+  add('<circle cx="' + bzx + '" cy="' + bzy + '" r="50" fill="#1f1f1f" stroke="#000"/>');
+  add('<circle cx="' + bzx + '" cy="' + bzy + '" r="40" fill="none" stroke="#333" stroke-width="2"/>');
+  add('<circle cx="' + bzx + '" cy="' + bzy + '" r="7" fill="#444"/>');
+  add('<text x="' + (bzx - 26) + '" y="' + (bzy - 14) + '" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">+</text>');
+  add('<text x="' + bzx + '" y="' + (bzy + 28) + '" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#ddd" text-anchor="middle">Buzzer</text>');
+
+  // Quang trở C25, C27
+  var lx = X(26), ly = Y.C;
+  add('<circle cx="' + lx + '" cy="' + ly + '" r="20" fill="#f1dfae" stroke="#a88c4a" stroke-width="1.5"/>');
+  add('<path d="M' + (lx - 12) + ' ' + (ly - 8) + ' h24 v5 h-24 v5 h24 v5 h-24 v5 h24" fill="none" stroke="#b0482a" stroke-width="2"/>');
+  label(lx, 768, "Quang trở");
+  resistorV(X(27), Y.B, Y["T-"], R10K);
+
+  // ================= Arduino Uno (USB bên phải) =================
+  add('<rect x="' + (UX + 4) + '" y="' + (UY + 6) + '" width="594" height="462" rx="14" fill="#000" opacity=".15"/>');
+  add('<rect x="' + UX + '" y="' + UY + '" width="594" height="462" rx="14" fill="#0b7f88" stroke="#06585e" stroke-width="2"/>');
+  [[UX + 30, UY + 70], [UX + 30, UY + 392], [UX + 520, UY + 440]].forEach(function (h) {
+    add('<circle cx="' + h[0] + '" cy="' + h[1] + '" r="11" fill="#f2f2ee" stroke="#c9b26a" stroke-width="3"/>');
+  });
+  // USB-B và jack nguồn
+  add('<rect x="' + (UX + 530) + '" y="' + (UY + 328) + '" width="118" height="96" rx="4" fill="#c4c8cc" stroke="#7d8388" stroke-width="1.5"/>');
+  add('<rect x="' + (UX + 560) + '" y="' + (UY + 350) + '" width="70" height="52" rx="3" fill="#9da3a8"/>');
+  add('<text x="' + (UX + 595) + '" y="' + (UY + 445) + '" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#e9f7f8" text-anchor="middle">USB → Raspberry Pi</text>');
+  add('<rect x="' + (UX + 548) + '" y="' + (UY + 62) + '" width="98" height="84" rx="5" fill="#1c1c1c"/>');
+  add('<circle cx="' + (UX + 600) + '" cy="' + (UY + 104) + '" r="16" fill="#333"/>');
+  // Chip, thạch anh, nút reset
+  add('<rect x="' + (UX + 60) + '" y="' + (UY + 170) + '" width="300" height="56" rx="4" fill="#161616"/>');
+  for (var k = 0; k < 14; k++) {
+    add('<rect x="' + (UX + 70 + k * 20.5) + '" y="' + (UY + 162) + '" width="8" height="8" fill="#b7b7b7"/><rect x="' + (UX + 70 + k * 20.5) + '" y="' + (UY + 226) + '" width="8" height="8" fill="#b7b7b7"/>');
+  }
+  add('<text x="' + (UX + 210) + '" y="' + (UY + 203) + '" font-family="IBM Plex Mono,monospace" font-size="13" fill="#c9c9c9" text-anchor="middle">ATMEGA328P</text>');
+  add('<rect x="' + (UX + 400) + '" y="' + (UY + 192) + '" width="38" height="16" rx="8" fill="#d7d9dc" stroke="#999"/>');
+  add('<rect x="' + (UX + 548) + '" y="' + (UY + 270) + '" width="34" height="34" rx="3" fill="#d9d9d9" stroke="#999"/><circle cx="' + (UX + 565) + '" cy="' + (UY + 287) + '" r="10" fill="#c62828"/>');
+  add('<text x="' + (UX + 565) + '" y="' + (UY + 318) + '" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#e9f7f8" text-anchor="middle">RESET</text>');
+  // Đèn L, TX, RX, ON
+  [["L", 250], ["TX", 266], ["RX", 282]].forEach(function (l) {
+    add('<rect x="' + (UX + 505) + '" y="' + (UY + l[1] - 5) + '" width="12" height="7" fill="#f2b51b"/><text x="' + (UX + 522) + '" y="' + (UY + l[1] + 2) + '" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#e9f7f8">' + l[0] + '</text>');
+  });
+  add('<rect x="' + (UX + 120) + '" y="' + (UY + 300) + '" width="12" height="7" fill="#45d36b"/><text x="' + (UX + 138) + '" y="' + (UY + 307) + '" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#e9f7f8">ON</text>');
+  // Đầu ICSP 2x3
+  for (var ir = 0; ir < 2; ir++) for (var ic = 0; ic < 3; ic++) {
+    add('<rect x="' + (UX + 22 + ic * 13) + '" y="' + (UY + 245 + ir * 13) + '" width="10" height="10" fill="#151515"/>');
+  }
+  add('<text x="' + (UX + 41) + '" y="' + (UY + 285) + '" font-family="Inter,sans-serif" font-size="8.5" font-weight="700" fill="#e9f7f8" text-anchor="middle">ICSP</text>');
+  // Tụ điện
+  [[UX + 455, UY + 120], [UX + 485, UY + 120]].forEach(function (c) {
+    add('<circle cx="' + c[0] + '" cy="' + c[1] + '" r="12" fill="#b9bdc2" stroke="#7b8086"/><path d="M' + (c[0] - 8) + ' ' + (c[1] - 4) + ' h16" stroke="#7b8086" stroke-width="2"/>');
+  });
+  // Biểu tượng ⊖⊕
+  add('<circle cx="' + (UX + 330) + '" cy="' + (UY + 290) + '" r="12" fill="none" stroke="#e9f7f8" stroke-width="3"/><circle cx="' + (UX + 356) + '" cy="' + (UY + 290) + '" r="12" fill="none" stroke="#e9f7f8" stroke-width="3"/>');
+  add('<path d="M' + (UX + 324) + ' ' + (UY + 290) + ' h12 M' + (UX + 350) + ' ' + (UY + 290) + ' h12 M' + (UX + 356) + ' ' + (UY + 284) + ' v12" stroke="#e9f7f8" stroke-width="2.6"/>');
+  add('<text x="' + (UX + 430) + '" y="' + (UY + 300) + '" font-family="Be Vietnam Pro,sans-serif" font-size="34" font-weight="700" fill="#e9f7f8" text-anchor="middle">UNO</text>');
+  add('<text x="' + (UX + 430) + '" y="' + (UY + 322) + '" font-family="Be Vietnam Pro,sans-serif" font-size="13" font-weight="600" fill="#bfe6e9" text-anchor="middle" letter-spacing="3">ARDUINO</text>');
+  add('<text x="' + (UX + 215) + '" y="' + (UY + 372) + '" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#e9f7f8" text-anchor="middle" letter-spacing="1">DIGITAL (PWM ~)</text>');
+  add('<text x="' + (UX + 100) + '" y="' + (UY + 120) + '" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#e9f7f8" text-anchor="middle" letter-spacing="1">ANALOG IN</text>');
+  add('<text x="' + (UX + 305) + '" y="' + (UY + 120) + '" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#e9f7f8" text-anchor="middle" letter-spacing="1">POWER</text>');
+  // Hàng chân
+  add('<rect x="' + (UX + 10) + '" y="' + (UY + 429) + '" width="178" height="22" fill="#151515"/><rect x="' + (UX + 199) + '" y="' + (UY + 429) + '" width="222" height="22" fill="#151515"/>');
+  add('<rect x="' + (UX + 32) + '" y="' + (UY + 11) + '" width="134" height="22" fill="#151515"/><rect x="' + (UX + 217) + '" y="' + (UY + 11) + '" width="178" height="22" fill="#151515"/>');
+  var PWM = { "3":1, "5":1, "6":1, "9":1, "10":1, "11":1 };
+  DIG.forEach(function (p) {
+    var x = UX + p[1], y = UY + 440;
+    add('<rect x="' + (x - 4) + '" y="' + (y - 4) + '" width="8" height="8" fill="#3a3a3a"/>');
+    var t = (PWM[p[0]] ? "~" : "") + p[0];
+    add('<text transform="translate(' + (x + 3.5) + ' ' + (y - 16) + ') rotate(-90)" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="600" fill="#ffffff">' + t + '</text>');
+  });
+  PWR.forEach(function (p) {
+    var x = UX + p[1], y = UY + 22;
+    add('<rect x="' + (x - 4) + '" y="' + (y - 4) + '" width="8" height="8" fill="#3a3a3a"/>');
+    add('<text transform="translate(' + (x - 3.5) + ' ' + (y + 16) + ') rotate(90)" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="600" fill="#ffffff">' + p[0] + '</text>');
+  });
+
+  // ================= LCD2004 + I2C (vẽ ½) =================
+  add('<rect x="24" y="66" width="424" height="260" rx="8" fill="#000" opacity=".15"/>');
+  add('<rect x="20" y="60" width="424" height="260" rx="8" fill="#22652c" stroke="#164a1e" stroke-width="2"/>');
+  [[36, 76], [428, 76], [36, 304], [428, 304]].forEach(function (h) { add('<circle cx="' + h[0] + '" cy="' + h[1] + '" r="8" fill="#f2f2ee" stroke="#c9b26a" stroke-width="2"/>'); });
+  for (var hp = 0; hp < 16; hp++) {        // 16 lỗ hàn của LCD
+    add('<circle cx="' + (80 + hp * 13) + '" cy="78" r="4" fill="#d9b44a"/><circle cx="' + (80 + hp * 13) + '" cy="78" r="1.6" fill="#22652c"/>');
+  }
+  add('<text x="80" y="96" font-size="8" fill="#cde3cf">1</text><text x="275" y="96" font-size="8" fill="#cde3cf">16</text>');
+  add('<rect x="44" y="102" width="360" height="190" rx="5" fill="#141414"/>');
+  add('<rect x="58" y="116" width="332" height="160" rx="3" fill="#2f55d4"/>');
+  for (var row = 0; row < 4; row++) for (var col = 0; col < 20; col++) {   // ô điểm ảnh mờ
+    add('<rect x="' + (66 + col * 16.1) + '" y="' + (124 + row * 37) + '" width="14" height="28" fill="#3a63e6" opacity=".55"/>');
+  }
+  for (var li = 0; li < 4; li++) {
+    add('<text id="lcd' + li + '" x="66" y="' + (146 + li * 37) + '" font-family="IBM Plex Mono,Consolas,monospace" font-size="23.5" textLength="322" lengthAdjust="spacing" fill="#eef3ff" xml:space="preserve"> </text>');
+  }
+  add('<text x="232" y="314" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="#d6ecd8" text-anchor="middle">LCD2004 + module I2C (vẽ thu nhỏ ½)</text>');
+  add('<rect x="420" y="139" width="18" height="88" rx="2" fill="#151515"/>');
+  var LCDP = [["SCL", 150], ["SDA", 172], ["VCC", 194], ["GND", 216]];
+  LCDP.forEach(function (p) {
+    add('<rect x="425" y="' + (p[1] - 4) + '" width="8" height="8" fill="#3a3a3a"/>');
+    add('<text x="414" y="' + (p[1] + 4) + '" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#ffffff" text-anchor="end">' + p[0] + '</text>');
+  });
+
+  // ================= Dây =================
+  // Nguồn (đi vòng bên phải Arduino)
+  var p5v = ppin("5V"), pgnd = ppin("GND", 2), pa0 = ppin("A0"), pa4 = ppin("A4"), pa5 = ppin("A5");
+  wire([p5v, [p5v[0], 40], [1192, 40], [1192, Y["T+"]], [X(30), Y["T+"]]], "red", 26, "5v");
+  wire([pgnd, [pgnd[0], 28], [1216, 28], [1216, Y["T-"]], [X(30), Y["T-"]]], "black", 26, "gnd");
+  wire([pa0, [pa0[0], 16], [1240, 16], [1240, 796], [X(27), 796], [X(27), Y.E]], "grey", 26, "a0");
+  // LCD
+  wire([[440, 150], [458, 150], [458, 46], [pa5[0], 46], pa5], "pink", 10, "scl");
+  wire([[440, 172], [470, 172], [470, 34], [pa4[0], 34], pa4], "blue", 10, "sda");
+  wire([[440, 194], [466, 194], [466, Y["T+"]], [X(1), Y["T+"]]], "red", 10, "lcdvcc");
+  wire([[440, 216], [454, 216], [454, Y["T-"]], [X(1), Y["T-"]]], "black", 10, "lcdgnd");
+  // Tín hiệu: từ hàng chân số uốn cong xuống hàng A
+  function sig(pin, col, color, id) {
+    var p = dpin(pin), tx = X(col);
+    wire([p, [p[0], 546], [tx, 590], [tx, Y.A]], color, 30, id);
+  }
+  sig("2", 4, "yellow", "d2"); sig("5", 8, "green", "d5"); sig("6", 11, "orange", "d6"); sig("7", 14, "purple", "d7");
+  sig("8", 17, "brown", "d8"); sig("9", 22, "white", "d9");
+  // Dây ngắn trên breadboard
+  wire([[X(3), Y.A], [X(2), Y["T+"]]], "red", 8, "dhtv");
+  wire([[X(6), Y.A], [X(6), Y["T-"]]], "black", 8, "dhtg");
+  wire([[X(19), Y.A], [X(19), Y["T-"]]], "black", 8, "bzg");
+  wire([[X(25), Y.A], [X(24), Y["T+"]]], "red", 8, "ldrv");
+
+  // Nhãn trên nền tối
+  function tag(x, y, t, anchor) {
+    add2('<text x="' + x + '" y="' + y + '" font-family="IBM Plex Mono,monospace" font-size="12" font-weight="600" letter-spacing="1.5" fill="#c9d0d6" text-anchor="' + (anchor || "start") + '">' + t + '</text>');
+  }
+  var top = "";
+  function add2(x) { top += x; }
+  tag(20, 350, "LCD 2004 + MẠCH I2C (0x27)");
+  tag(1150, 566, "ARDUINO UNO R3 · USB QUAY SANG PHẢI", "end");
+  tag(1150, 1014, "BREADBOARD", "end");
+  tag(20, 372, "4 chân I2C nằm sau lưng LCD", "start");
+
+  var art = document.getElementById("art");
+  art.innerHTML = s + plugs + wires + top;
+
+  // ---------- LCD mô phỏng: đổi mỗi 2 giây như chu kỳ đọc DHT22 ----------
+  var TH = { tMin: 22, tMax: 28, hMin: 85, hMax: 95, lMin: 200, lMax: 500 };
+  var sim = { t: 26.4, h: 86.5, lux: 320, k: 0 };
+  function pad(t) { return (t + "                    ").slice(0, 20); }
+  function fmt(v, w) { var s2 = v.toFixed(1); while (s2.length < w) s2 = " " + s2; return s2; }
+  function tickLcd() {
+    sim.k++;
+    sim.t = Math.max(21, Math.min(30, sim.t + (Math.random() - 0.5) * 0.4));
+    sim.h = 86 + 7 * Math.sin(sim.k / 9) + (Math.random() - 0.5);
+    sim.lux = Math.max(60, Math.round(300 + 180 * Math.sin(sim.k / 13) + (Math.random() - 0.5) * 20));
+    var tag3 = "ON DINH", tip = "Moi thu on dinh", st = "OK";
+    if (sim.h < TH.hMin) { st = "CHU Y"; tag3 = "AM THAP"; tip = ">Can: phun suong"; }
+    else if (sim.t > TH.tMax) { st = "CHU Y"; tag3 = "NONG"; tip = ">Can: lam mat"; }
+    else if (sim.lux < TH.lMin) { st = "CHU Y"; tag3 = "THIEU SANG"; tip = ">Can: bat den"; }
+    var lines = ["T:" + fmt(sim.t, 4) + "C   H:" + fmt(sim.h, 5) + "%",
+                 "Sang:" + ("     " + sim.lux).slice(-5) + " lux   USB",
+                 (st + "         ").slice(0, 9) + " " + tag3, tip];
+    for (var i = 0; i < 4; i++) {
+      var el = document.getElementById("lcd" + i);
+      if (el) el.textContent = pad(lines[i]);
+    }
+  }
+  tickLcd();
+  setInterval(tickLcd, 2000);
+
+  // ---------- Chú thích màu ----------
+  var legend = [["red", "5V"], ["black", "GND"], ["yellow", "D2 · DHT22"], ["green", "D5 · LED xanh"], ["orange", "D6 · LED vàng"],
+                ["purple", "D7 · LED đỏ"], ["brown", "D8 · buzzer"], ["white", "D9 · LED trắng"], ["grey", "A0 · quang trở"],
+                ["blue", "A4 · SDA"], ["pink", "A5 · SCL"]];
+  document.getElementById("legend").innerHTML = legend.map(function (l) {
+    return '<span><i style="background:' + W[l[0]] + '"></i>' + l[1] + '</span>';
+  }).join("");
+
+  // ---------- Bảng dây ----------
+  var rows = [
+    ["Arduino 5V", "Ray +, cột 30", "red", "Nguồn", "5v"],
+    ["Arduino GND (cạnh 5V)", "Ray –, cột 30", "black", "Mát chung", "gnd"],
+    ["Arduino chân 2", "A4", "yellow", "DATA của DHT22 (D4)", "d2"],
+    ["A3", "Ray +", "red", "VCC DHT22 (D3)", "dhtv"],
+    ["A6", "Ray –", "black", "GND DHT22 (D6)", "dhtg"],
+    ["Arduino chân 5", "A8", "green", "Chân dài LED xanh lá (C8)", "d5"],
+    ["Arduino chân 6", "A11", "orange", "Chân dài LED vàng (C11)", "d6"],
+    ["Arduino chân 7", "A14", "purple", "Chân dài LED đỏ (C14)", "d7"],
+    ["Arduino chân 8", "A17", "brown", "Chân + buzzer (E17)", "d8"],
+    ["A19", "Ray –", "black", "Chân – buzzer (E19)", "bzg"],
+    ["Arduino chân 9", "A22", "white", "Chân dài LED trắng (C22)", "d9"],
+    ["A25", "Ray +", "red", "Chân quang trở (C25)", "ldrv"],
+    ["Arduino A0", "E27", "grey", "Điểm giữa quang trở và 10kΩ", "a0"],
+    ["LCD SCL", "Arduino A5", "pink", "Dây cái–đực", "scl"],
+    ["LCD SDA", "Arduino A4", "blue", "Dây cái–đực", "sda"],
+    ["LCD VCC", "Ray +, cột 1", "red", "Dây cái–đực", "lcdvcc"],
+    ["LCD GND", "Ray –, cột 1", "black", "Dây cái–đực", "lcdgnd"],
+    ["Arduino USB", "Raspberry Pi USB", null, "Cắm sau cùng, sau khi kiểm tra", ""]
+  ];
+  document.getElementById("wireTable").innerHTML = rows.map(function (r) {
+    var sw = r[2] ? '<span class="sw" style="background:' + W[r[2]] + '"></span>' + NAME[r[2]] : "Cáp USB";
+    var attr = r[4] ? ' data-w="' + r[4] + '" tabindex="0"' : "";
+    return "<tr" + attr + "><td>" + r[0] + "</td><td>" + r[1] + "</td><td>" + sw + "</td><td>" + r[3] + "</td></tr>";
+  }).join("");
+
+  // ---------- Làm nổi một sợi dây khi rê chuột / chạm vào dòng trong bảng hoặc vào dây ----------
+  var pinned = null;
+  function highlight(id) {
+    art.classList.toggle("hl", !!id);
+    Array.prototype.forEach.call(art.querySelectorAll(".wire"), function (g) { g.classList.toggle("on", g.getAttribute("data-w") === id); });
+    Array.prototype.forEach.call(document.querySelectorAll("tr[data-w]"), function (tr) { tr.classList.toggle("on", tr.getAttribute("data-w") === id); });
+  }
+  function bind(el) {
+    var id = el.getAttribute("data-w");
+    if (!id) return;
+    el.addEventListener("mouseenter", function () { highlight(id); });
+    el.addEventListener("mouseleave", function () { highlight(pinned); });
+    el.addEventListener("focus", function () { highlight(id); });
+    el.addEventListener("blur", function () { highlight(pinned); });
+    el.addEventListener("click", function () { pinned = pinned === id ? null : id; highlight(pinned || id); });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("tr[data-w]"), bind);
+  Array.prototype.forEach.call(art.querySelectorAll(".wire"), bind);
+
+  // ---------- Phóng to ----------
+  var zoom = document.getElementById("zoomBtn"), stage = document.getElementById("stage");
+  zoom.addEventListener("click", function () {
+    var big = stage.classList.toggle("big");
+    zoom.setAttribute("aria-pressed", big ? "true" : "false");
+    zoom.textContent = big ? "Thu nhỏ hình" : "Phóng to hình";
+  });
+
+  // ---------- Đánh dấu bước (chỉ lưu trên trình duyệt này) ----------
+  var KEY = "mycoguard.wiring.v2";
+  var boxes = Array.prototype.slice.call(document.querySelectorAll("#steps input[type=checkbox]"));
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { saved = {}; }
+  function refresh() {
+    var done = 0;
+    boxes.forEach(function (b) { b.closest("li").classList.toggle("done", b.checked); if (b.checked) done++; });
+    document.getElementById("progText").textContent = "Đã xong " + done + "/" + boxes.length + " bước";
+    document.getElementById("progBar").style.width = (100 * done / boxes.length) + "%";
+  }
+  boxes.forEach(function (b) {
+    b.checked = !!saved[b.id];
+    b.addEventListener("change", function () {
+      saved[b.id] = b.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) { /* trình duyệt chặn lưu trữ */ }
+      refresh();
+    });
+  });
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    boxes.forEach(function (b) { b.checked = false; });
+    saved = {};
+    try { localStorage.removeItem(KEY); } catch (e) { /* bỏ qua */ }
+    refresh();
+  });
+  refresh();
+})();
+</script>

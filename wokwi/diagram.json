@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "author": "MycoGuard",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-dht22", "id": "dht1", "top": -172.5, "left": -24.6, "attrs": { "temperature": "26", "humidity": "88" } },
+    { "type": "wokwi-photoresistor-sensor", "id": "ldr1", "top": -169.6, "left": 307.2, "attrs": {} },
+    { "type": "wokwi-lcd2004", "id": "lcd1", "top": 265.6, "left": 24, "attrs": { "pins": "i2c" } },
+    { "type": "wokwi-led", "id": "ledG", "top": -128.4, "left": 99.8, "attrs": { "color": "green" } },
+    { "type": "wokwi-led", "id": "ledY", "top": -128.4, "left": 138.2, "attrs": { "color": "yellow" } },
+    { "type": "wokwi-led", "id": "ledR", "top": -128.4, "left": 176.6, "attrs": { "color": "red" } },
+    { "type": "wokwi-led", "id": "ledW", "top": -128.4, "left": 263, "attrs": { "color": "white" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": -43.2, "left": 95.45, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-resistor", "id": "r2", "top": -43.2, "left": 133.85, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-resistor", "id": "r3", "top": -43.2, "left": 172.25, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-resistor", "id": "r4", "top": -43.2, "left": 258.65, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-buzzer", "id": "bz1", "top": -141.6, "left": 213, "attrs": { "volume": "0.1" } }
+  ],
+  "connections": [
+    [ "dht1:VCC", "uno:5V", "red", [] ],
+    [ "dht1:GND", "uno:GND.1", "black", [] ],
+    [ "dht1:SDA", "uno:2", "green", [] ],
+
+    [ "ldr1:VCC", "uno:5V", "red", [] ],
+    [ "ldr1:GND", "uno:GND.1", "black", [] ],
+    [ "ldr1:AO", "uno:A0", "orange", [] ],
+
+    [ "lcd1:VCC", "uno:5V", "red", [] ],
+    [ "lcd1:GND", "uno:GND.2", "black", [] ],
+    [ "lcd1:SDA", "uno:A4", "blue", [] ],
+    [ "lcd1:SCL", "uno:A5", "violet", [] ],
+
+    [ "uno:5", "r1:2", "green", [] ],
+    [ "r1:1", "ledG:A", "green", [] ],
+    [ "ledG:C", "uno:GND.1", "black", [] ],
+
+    [ "uno:6", "r2:2", "gold", [] ],
+    [ "r2:1", "ledY:A", "gold", [] ],
+    [ "ledY:C", "uno:GND.1", "black", [] ],
+
+    [ "uno:7", "r3:2", "red", [] ],
+    [ "r3:1", "ledR:A", "red", [] ],
+    [ "ledR:C", "uno:GND.1", "black", [] ],
+
+    [ "uno:9", "r4:2", "white", [] ],
+    [ "r4:1", "ledW:A", "white", [] ],
+    [ "ledW:C", "uno:GND.1", "black", [] ],
+
+    [ "uno:8", "bz1:2", "orange", [] ],
+    [ "bz1:1", "uno:GND.1", "black", [] ]
+  ],
+  "dependencies": {}
+}

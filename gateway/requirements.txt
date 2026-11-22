@@ -1,0 +1,4 @@
+Flask>=3.0
+pyserial>=3.5
+# Chỉ cài trên Raspberry Pi khi có LED 4 số TM1637:
+# raspberrypi-tm1637>=1.3
